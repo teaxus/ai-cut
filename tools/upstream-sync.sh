@@ -27,7 +27,7 @@ show_help() {
           --install 先 npm ci（上游改了依赖时要加），--package 再本机打一个 mac 目录包
   report  生成 docs/upgrades/<to>.md：上游 CHANGELOG、MCP 工具变化、技能、设置项、依赖、被改动的接入点
           默认 from = main 分支上 aicut.json 的基线，to = 当前工作区的基线
-  finish  门禁通过后把 sync/<tag> 快进合并回 main，打本地 tag v<版本>-aicut.1（不推送 / never pushes）
+  finish  门禁通过后把 sync/<tag> 快进合并回切出它的分支（通常是 main），打本地 tag v<版本>-aicut.1（不推送 / never pushes）
 
 选项 / Options:
   --continue   （start）冲突解决并提交后，完成收尾步骤 / finish the post-merge steps after resolving
@@ -96,7 +96,10 @@ cmd_start() {
   [[ -z "$(git status --porcelain --untracked-files=no)" ]] || die "工作区有未提交的改动，先提交 / commit your changes first"
   local branch="sync/${tag}"
   git rev-parse -q --verify "refs/heads/${branch}" >/dev/null && die "分支 ${branch} 已存在 / branch exists"
+  local base_branch; base_branch="$(git branch --show-current)"
+  [[ -n "${base_branch}" ]] || die "当前不在任何分支上（detached HEAD）/ not on a branch"
   git switch -q -c "${branch}"
+  git config "branch.${branch}.aicutSyncBase" "${base_branch}"   # finish 合回这个分支
   say "在 ${branch} 上合并 / merging ${tag}"
   if git merge --no-ff -m "chore(sync): 合并上游 ${tag}" "${tag}"; then
     post_merge "${tag}"; return 0
@@ -146,10 +149,15 @@ cmd_finish() {
   local ok_file; ok_file="$(git rev-parse --git-dir)/aicut-gate-ok"
   [[ -f "${ok_file}" && "$(cat "${ok_file}")" == "$(git rev-parse HEAD)" ]] || die "当前提交没过门禁：先 ./tools/upstream-sync.sh gate / gate not passed for HEAD"
   local version; version="$(node -p "require('./package.json').version")-aicut.$(node -p "require('./aicut.json').revision")"
-  git switch -q main
-  git merge --ff-only "${branch}"
+  local target; target="$(git config --get "branch.${branch}.aicutSyncBase" || echo main)"
+  if ! git merge-base --is-ancestor "${target}" "${branch}"; then
+    die "${target} 在同步期间有了新提交，不能快进：先在 ${branch} 上 git merge ${target}，再跑 gate 和 finish / ${target} moved on"
+  fi
+  git rev-parse -q --verify "refs/tags/v${version}" >/dev/null && die "tag v${version} 已存在：先把 aicut.json 的 revision 加 1 / tag exists"
+  git switch -q "${target}"
+  git merge -q --ff-only "${branch}"
   git tag "v${version}"
-  say "main 已更新到 $(git rev-parse --short HEAD)，本地 tag v${version}（未推送 / not pushed）"
+  say "${target} 已更新到 $(git rev-parse --short HEAD)，本地 tag v${version}（未推送 / not pushed）"
 }
 
 case "${1:-}" in
