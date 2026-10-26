@@ -55,6 +55,8 @@ AI Cut 是 OpenChatCut 的薄壳派生版：上游代码原样保留，派生版
 
 ## 不要做的事
 
-- 不要 rebase `main`，不要改写已提交的历史；不要 `git push --force`。
+- 不要 rebase `main`，不要改写已提交的历史；不要 `git push --force`。另一个原因：rebase / cherry-pick 时 git 的
+  "ours" 指的是**被重放到的那一边（上游）**，`.gitattributes` 的 `merge=ours`（README）会因此悄悄保留上游的 README、
+  丢掉派生版的（2026-10-25 预演实测）。同步只用 `merge`。
 - 不要为了让门禁通过去改上游的 verify（接入点 IP-03 那种跟随改动除外，且必须已登记）。
 - 不要在 `package.json` 里加脚本或依赖。
