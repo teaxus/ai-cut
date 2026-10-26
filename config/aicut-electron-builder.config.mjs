@@ -54,6 +54,7 @@ export default {
           }),
         }),
   },
-  win: { ...base.win, icon: 'assets/aicut/icon.png' },
+  // 直接给 .ico：用 PNG 时 electron-builder 要先从 GitHub 下载 icons-bundle 转格式（打包主机上曾因此卡 10 分钟超时）
+  win: { ...base.win, icon: 'assets/aicut/icon.ico' },
   linux: { ...base.linux, icon: 'assets/aicut/icon.png', executableName: 'ai-cut' },
 };
