@@ -23,12 +23,12 @@
 | IP-08 | `desktop/embedded-port.ts` | `aicut-hook:IP-08` | ours | landed | 规范端口改为读 `AICUT_CANONICAL_PORT`（派生入口设 5299，不设时仍是 5199）；端口记忆文件跟随 `AICUT_HOME` |
 | IP-09 | `server/plugins/index.ts` | `aicut-hook:IP-09` | keep-hook | landed | 顶部 import + 插件数组末尾 `...aicutServerPlugins()`；派生服务端插件全部在 `server/plugins/aicut/`（目前是「Agent 接入」的 `/api/aicut/agents/*`） |
 | IP-10 | `src/components/settings/settingsSchema.ts` | `aicut-hook:IP-10` | keep-hook | removed | 原计划在设置里加「Agent 接入」分区；改为替换上游已有的「外部 Agent 接入 (MCP)」弹窗（IP-16），不新增第二个入口 |
-| IP-11 | `src/i18n/dict/en/index.ts` | `aicut-hook:IP-11` | keep-hook | planned | 组装英文字典时并入 `aicut.ts`（派生界面的词条，中文即 key）；意大利语缺词时回退英文，俄语界面缺词显示中文（上游行为） |
+| IP-11 | `src/i18n/dict/en/index.ts` | `aicut-hook:IP-11` | keep-hook | landed | 组装英文字典时并入 `aicut.ts`（派生界面的词条，中文即 key）；意大利语缺词时回退英文，俄语界面缺词显示中文（上游行为） |
 | IP-12 | `src/components/chat/ChatPanelView.tsx` | `aicut-hook:IP-12` | ours | landed | 聊天栏折叠时的竖排品牌字 AI Cut |
 | IP-13 | `server/runtime-profile.ts` | `aicut-hook:IP-13` | keep-hook | landed | 默认 profile 的数据根目录改走 `openChatCutHomeRoot()`：设了 `AICUT_HOME`（派生入口设为 `~/.ai-cut`）就用它，否则与上游一致 |
 | IP-14 | `server/data-dir.ts` | `aicut-hook:IP-14` | keep-hook | landed | 数据目录指针文件跟随 `AICUT_HOME`，设置页改数据目录不会写进上游的 `~/.openchatcut` |
 | IP-15 | `server/mcp-token.ts` | `aicut-hook:IP-15` | keep-hook | landed | MCP token 文件跟随 `AICUT_HOME`，与上游并装时各用各的 token |
-| IP-16 | `src/components/settings/mcpGuideLoader.ts` | `aicut-hook:IP-16` | ours | planned | 顶栏插头按钮加载的弹窗换成派生版 `settings/aicut/AgentConnectDialog.tsx`（MCP 与技能一起装进各 agent）；首页、编辑器两处入口都经这一个加载器 |
+| IP-16 | `src/components/settings/mcpGuideLoader.ts` | `aicut-hook:IP-16` | ours | landed | 顶栏插头按钮加载的弹窗换成派生版 `src/components/aicut/agent-connect/McpGuide.tsx`（MCP 与技能一起装进各 agent）；首页、编辑器两处入口都经这一个加载器。文件名保持 `McpGuide`，上游 `mcpGuideLoader.verify.ts` 的"只能经加载器导入"检查不用改 |
 
 
 新增接入点时：编号顺延，不复用旧编号；删除接入点时把状态改成 `removed` 并写明原因，不删行。

@@ -3,6 +3,7 @@
 > 项目：/Users/teaxus/AILearning/ai-cut　日期：2026-10-25　作者：主会话（Opus 5.5）
 > 取代上游的「外部 Agent 接入 (MCP)」弹窗（`src/components/settings/McpGuide.tsx`），入口不变：
 > 首页顶栏与编辑器顶栏的插头按钮（两处都经 `mcpGuideLoader.ts` 加载，派生版只改这一个加载器 → 接入点 IP-16）。
+> 实现：`src/components/aicut/agent-connect/`（入口 `McpGuide.tsx`）。
 
 ## 1. 用户与目标
 - 谁用：装了 AI Cut、同时在用 Claude Code / Codex / Cursor 等 AI 编码 agent 的人。频率低：装好 AI Cut 后一次，换端口 / 新装 agent / 升级 AI Cut 后偶尔一次。

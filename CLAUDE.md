@@ -15,7 +15,7 @@ ai-cut 是 [OpenChatCut](https://github.com/0xsline/OpenChatCut)（AGPL-3.0-or-l
    再在改动处写 `aicut-hook:<编号>` 注释（文件格式不允许注释的除外，如 PNG）。
    `tools/upstream-sync.sh gate` 会检查每个登记的标记都还在。
 4. 派生代码放 `aicut/` 子目录或带 `aicut` 前缀的文件：`server/plugins/aicut/`、`server/external-agent/aicut/`、
-   `src/components/settings/aicut/`、`desktop/aicut/`、`src/i18n/dict/<lang>/aicut.ts`、`assets/aicut/`、`tools/`。
+   `src/components/aicut/`（派生界面；不要放进 `src/components/settings/`，那里的界面上游要求必须有意大利语词条）、`desktop/aicut/`、`src/i18n/dict/<lang>/aicut.ts`、`assets/aicut/`、`tools/`。
 5. 遵守上游门禁：非测试源码 ≤ 500 行；`t('中文')` 必须有英文词条（中文就是 key）；
    改了 agent 工具要重新生成 `assets/agent/openchatcut-tool-schemas.json`（`npm run generate:server-tool-catalog`）。
 6. 上游的 `scripts/` 目录默认被 `.gitignore` 忽略，派生脚本不要放那里。

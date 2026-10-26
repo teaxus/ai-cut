@@ -17,9 +17,11 @@ import settings from './settings';
 import timeline from './timeline';
 import topbar from './topbar';
 import transcript from './transcript';
+import aicut from './aicut'; // aicut-hook:IP-11
 
 export const EN: Record<string, string> = Object.assign(
   {},
   audio, captions, chat, components, editor, exportPanel, fx, generate,
   library, media, progress, review, script, settings, timeline, topbar, transcript,
+  aicut, // aicut-hook:IP-11 派生界面词条，放最后
 );

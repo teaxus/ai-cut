@@ -23,3 +23,4 @@
 | D-19 | 2026-10-25 | MCP 服务名用 `ai-cut`（不用上游的 `openchatcut`），技能名 `ai-cut` | 与上游 OpenChatCut 并装时各自的 agent 配置互不覆盖 |
 | D-20 | 2026-10-25 | Windows 远端打包自动探测打包主机本机代理，并设 `NODE_USE_ENV_PROXY=1` | SSH 会话不继承桌面会话的代理；electron-builder 用 Node 的 got 下载工具，默认不认代理变量（实测超时） |
 | D-21 | 2026-10-25 | 技能实体只放一处 `~/.ai-cut/agent-skill/ai-cut`，各 agent 的 skills 目录里放链接（Windows 用 junction），建链接失败才复制 | 与本机"skill 实体放一处、各 agent 目录只放链接"的规则一致；更新技能只改一处；vercel skills CLI 默认也是链接 |
+| D-22 | 2026-10-25 | 派生界面放 `src/components/aicut/`，只提供中文与英文；意大利语按上游机制回退英文，俄语界面缺词显示中文 | 上游要求 `src/components/settings/` 下的界面必须有意大利语词条（`it/settingsCoverage.verify.ts`）；AI Cut 面向中文用户，不为意大利语 / 俄语维护派生词条 |
