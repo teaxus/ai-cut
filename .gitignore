@@ -107,3 +107,16 @@ public/whisper-cli/
 
 # Agent tooling local state (Command Code taste captures)
 .commandcode/
+
+# --- ai-cut（派生版）aicut-hook:IP-01 -----------------------------------------
+# 上游忽略了 docs/、CLAUDE.md、AGENTS.md、.claude/，派生版要把这些纳入版本管理。
+# 派生版的脚本一律放 tools/（上游的 /scripts/* 默认忽略）。
+!/docs/
+!/CLAUDE.md
+!/AGENTS.md
+!/.claude/
+/.claude/settings.local.json
+/.claude/worktrees/
+# 派生版本地产物
+/release-aicut/
+/.aicut-cache/

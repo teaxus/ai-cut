@@ -1,0 +1,4 @@
+# ai-cut：这些文件完全由派生版维护，合并上游时直接保留我们的版本。
+# 需要本地 git 配置 merge.ours.driver=true（tools/setup-repo.sh 会设置）。
+README.md merge=ours
+README_ZH.md merge=ours
