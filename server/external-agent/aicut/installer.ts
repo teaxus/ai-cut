@@ -14,7 +14,7 @@ import {
   SERVER_NAME, fillTemplate, inspectCodexToml, inspectDropin, inspectJson, installCodexToml, installDropin,
   installJson, renderDropin, uninstallCodexToml, uninstallDropin, uninstallJson, type McpState, type WriteContext,
 } from './mcp-writers.ts';
-import { SKILL_NAME, inspectSkill, installSkill, skillSourceDir, uninstallSkill, type SkillState } from './skill-installer.ts';
+import { SKILL_NAME, canonicalSkillDir, inspectSkill, installSkill, skillSourceDir, uninstallSkill, type SkillState } from './skill-installer.ts';
 
 import type { Action, AgentStatus, ApplyResult, McpStatus, Part, SkillStatus } from '../../../shared/aicut/agent-api.ts';
 
@@ -188,7 +188,7 @@ async function skillStatus(agent: AgentDef, ctx: Ctx): Promise<SkillStatus> {
   if (!ctx.skillSource) return { mode: 'auto', state: 'no-source', path: shown, ...extra };
   let worst: SkillState = 'installed';
   for (const root of roots) {
-    const state = await inspectSkill(root, ctx.skillSource);
+    const state = await inspectSkill(root, ctx.skillSource, canonicalSkillDir(ctx.dataRoot));
     if (SKILL_RANK[state] > SKILL_RANK[worst]) worst = state;
   }
   return { mode: 'auto', state: worst, path: shown, ...extra };
@@ -293,13 +293,14 @@ async function applySkill(agent: AgentDef, action: Action, ctx: Ctx): Promise<Ap
     if (action === 'install') {
       if (!ctx.skillSource) throw new Error('找不到 AI Cut 自带的技能文件（skills/ai-cut）');
       if (status.state === 'installed') return { id: agent.id, part: 'skill', ok: true, changed: false, path: status.path };
+      const canonical = canonicalSkillDir(ctx.dataRoot);
       for (const root of roots) {
-        if (await inspectSkill(root, ctx.skillSource) !== 'installed') await installSkill(root, ctx.skillSource, ctx.opts.now?.() ?? new Date());
+        if (await inspectSkill(root, ctx.skillSource, canonical) !== 'installed') await installSkill(root, ctx.skillSource, canonical, ctx.opts.now?.() ?? new Date(), ctx.platform);
       }
       return { id: agent.id, part: 'skill', ok: true, changed: true, path: status.path };
     }
     let changed = false;
-    for (const root of roots) changed = (await uninstallSkill(root)) || changed;
+    for (const root of roots) changed = (await uninstallSkill(root, canonicalSkillDir(ctx.dataRoot))) || changed;
     return { id: agent.id, part: 'skill', ok: true, changed, path: status.path };
   } catch (error) {
     return { id: agent.id, part: 'skill', ok: false, changed: false, path: status.path, error: error instanceof Error ? error.message : String(error) };

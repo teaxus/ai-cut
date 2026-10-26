@@ -68,6 +68,7 @@ test('批量安装 → 全部已安装；记录与备份落在 AI Cut 数据目�
   assert.equal(cfg.mcpServers['ai-cut'].headers.Authorization, 'Bearer tok_1');
   assert.match(readFileSync(join(home, '.codex-like', 'config.toml'), 'utf8'), /\[mcp_servers\.ai-cut\]\nurl = "http:\/\/127\.0\.0\.1:5299/);
   assert.ok(existsSync(join(home, '.manual', 'skills', 'ai-cut', 'SKILL.md')), '手动 MCP 的 agent 仍然装上技能');
+  assert.ok(existsSync(join(home, '.ai-cut', 'agent-skill', 'ai-cut', 'SKILL.md')), '技能实体在 AI Cut 数据目录');
   const record = JSON.parse(readFileSync(join(home, '.ai-cut', 'agent-installs.json'), 'utf8'));
   assert.ok(record.agents['json-agent'].mcp.installedAt);
   assert.equal(readdirSync(join(home, '.ai-cut', 'agent-backups')).length, 1, '改动前的原文件有备份');

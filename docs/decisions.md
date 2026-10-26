@@ -22,3 +22,4 @@
 | D-18 | 2026-10-25 | Claude Code 优先用 `claude mcp add-json --scope user` 写入，命令不在或失败时才直接合并 `~/.claude.json`，写完回读确认 | `~/.claude.json` 是 Claude Code 运行时频繁写入的状态文件，直接改有并发覆盖风险 |
 | D-19 | 2026-10-25 | MCP 服务名用 `ai-cut`（不用上游的 `openchatcut`），技能名 `ai-cut` | 与上游 OpenChatCut 并装时各自的 agent 配置互不覆盖 |
 | D-20 | 2026-10-25 | Windows 远端打包自动探测打包主机本机代理，并设 `NODE_USE_ENV_PROXY=1` | SSH 会话不继承桌面会话的代理；electron-builder 用 Node 的 got 下载工具，默认不认代理变量（实测超时） |
+| D-21 | 2026-10-25 | 技能实体只放一处 `~/.ai-cut/agent-skill/ai-cut`，各 agent 的 skills 目录里放链接（Windows 用 junction），建链接失败才复制 | 与本机"skill 实体放一处、各 agent 目录只放链接"的规则一致；更新技能只改一处；vercel skills CLI 默认也是链接 |
