@@ -1,0 +1,52 @@
+# .pkghost.yaml —— 远程打包主机清单 / remote packaging-host registry
+#
+# ★ 放哪儿：优先 ~/.pkghost.yaml（家目录）
+#   打包主机是「你的机器」，不是某个项目的属性。放家目录 = 配一次，以后每个新项目
+#   直接就能 --pkg，不用重配。两个位置都会读，顺序是：
+#       1. ~/.pkghost.yaml     ← 推荐。所有项目共用（$PKGHOST_CONFIG 可改路径）
+#       2. ./.pkghost.yaml     ← 可选。仅本项目，同名主机【按属性】覆盖家目录那份，
+#                                 所以这里通常只需写一行 workdir，不必重复 host/user/key
+#   两个文件都不要提交进仓库（含本机专属的主机名/用户/私钥路径），项目里那份已 gitignore。
+#
+#   cp .pkghost.yaml.example ~/.pkghost.yaml     # 然后改下面的内容
+#   或直接引导配置： ./tools/pkghost-init.sh --name g1 --host ... --user ...
+#
+# 配好后：
+#   ./build.sh --list-pkg                       # 我能往哪儿打包？（含 github）
+#   ./build.sh --pkg g1 --platform windows      # 用下面名为 g1 的主机打 Windows 包
+#   ./build.sh --pkg github --platform windows  # 仍走 GitHub Actions（github 是保留名）
+#   ./tools/pkghost-build.sh --doctor g1        # 测连通性与远端工具链
+#
+# Prefer ~/.pkghost.yaml: a build box belongs to YOU, not to one project, so
+# configuring it per project means redoing this for every new repo. Both paths are
+# read — home first, then the project file overriding PER ATTRIBUTE. `github` is a
+# reserved name meaning "build on GitHub Actions" and needs no entry here.
+
+# 不带主机名时 `--pkg` 用哪个：可填 github 或下面 hosts 里的某个名字。
+default: github
+
+hosts:
+  # 名字随意，用于 `--pkg <名字>` / arbitrary label used as `--pkg <name>`
+  g1:
+    host: my-win-box.local           # 主机名或 IP / hostname or IP
+    user: builder                    # SSH 登录用户 / ssh login user
+    key: ~/.ssh/pkghost_g1_key       # 私钥路径（~ 会展开）/ identity file
+    port: 22                         # SSH 端口 / ssh port
+    platform: windows                # 该主机能打的平台 / platform it can build
+
+    # 远端构建目录 / remote build dir。
+    # 【放家目录时不要写死项目名】否则所有项目会在远端撞进同一个目录、互相覆盖。
+    # 不写 = 自动用 C:/pkgbuild/<当前项目目录名>；要显式写就用 {project} 占位符。
+    # Omit it (per-project default) or use {project}; a hardcoded path in the
+    # shared home config makes every project build into the same remote dir.
+    workdir: C:/pkgbuild/{project}
+
+    # retry_budget: 180              # 连接/传输失败后重试多久（秒，默认 180）。
+                                     # 对端走 Wi-Fi 时链路可能整段掉线（实测约 30 秒），
+                                     # 这个窗口必须显著长于一次掉线，否则所有重试都落在
+                                     # 同一个掉线窗口里 = 等于没重试。插网线的主机可调小。
+
+    # family: inet                   # 默认 inet（只走 IPv4）。局域网主机常同时广播 A 和 AAAA，
+                                     # 而本机往往只有 fe80:: 链路本地 IPv6、没有可路由的全局 IPv6，
+                                     # ssh 优先试 IPv6 就会间歇性 "No route to host"。
+                                     # IPv6-only 主机写 inet6；恢复系统默认写 any。
