@@ -34,6 +34,8 @@ show_help() {
   --pristine         用上游原样的打包配置（产物在 release/，基线验证用）/ upstream config, baseline check
   --skip-web         复用已有的 dist/，跳过 vite build（仅本机）/ reuse dist/ (local only)
   --keep-remote      保留远端中间物便于排查 / keep remote intermediates
+  --proxy URL        远端构建用的 HTTP 代理（默认远端自动探测 127.0.0.1:7897 / 7890）/ remote build proxy
+  --smoke            （Windows）打完在打包主机上静默安装 → 冒烟启动（含真实渲染）→ 卸载 / install+smoke+uninstall
   -n, --dry-run      只打印步骤，不执行 / print steps only
   -h, --help         显示本帮助 / show this help
 
@@ -47,7 +49,7 @@ HELP
 
 [[ $# -eq 0 ]] && { show_help; exit 0; }
 
-DO_MAC=0; DO_WIN=0; ARCH=""; PKG=""; DIR=0; TARGETS=""; PRISTINE=0; SKIP_WEB=0; KEEP_REMOTE=0; DRY=0; LIST=0
+DO_MAC=0; DO_WIN=0; ARCH=""; PKG=""; DIR=0; TARGETS=""; PRISTINE=0; SKIP_WEB=0; KEEP_REMOTE=0; DRY=0; LIST=0; PROXY=""; SMOKE=0
 while [[ $# -gt 0 ]]; do
   case "$1" in
     -h|--help) show_help; exit 0 ;;
@@ -61,6 +63,8 @@ while [[ $# -gt 0 ]]; do
     --pristine) PRISTINE=1; shift ;;
     --skip-web) SKIP_WEB=1; shift ;;
     --keep-remote) KEEP_REMOTE=1; shift ;;
+    --proxy) PROXY="${2:-}"; shift 2 ;;
+    --smoke) SMOKE=1; shift ;;
     -n|--dry-run) DRY=1; shift ;;
     *) die "未知参数 / unknown option: $1（见 -h）" ;;
   esac
@@ -76,6 +80,8 @@ if [[ ${DO_WIN} -eq 1 ]]; then
   [[ ${PRISTINE} -eq 1 ]] && args+=(--pristine) && args+=(--out-dir "${AICUT_ROOT}/release/windows")
   [[ ${DIR} -eq 1 ]] && args+=(--dir)
   [[ ${KEEP_REMOTE} -eq 1 ]] && args+=(--keep-remote)
+  [[ -n "${PROXY}" ]] && args+=(--proxy "${PROXY}")
+  [[ ${SMOKE} -eq 1 ]] && args+=(--smoke)
   [[ ${DRY} -eq 1 ]] && args+=(--dry-run)
   say "远端打包 / remote build: ./tools/pkghost-build.sh ${args[*]}"
   ./tools/pkghost-build.sh "${args[@]}"

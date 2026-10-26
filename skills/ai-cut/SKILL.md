@@ -1,0 +1,53 @@
+---
+name: ai-cut
+description: Connect an MCP-capable coding agent to AI Cut (the desktop edition of OpenChatCut) and edit local video projects. Use when the user asks to install, connect, or set up AI Cut; inspect or edit an AI Cut project
+---
+
+# AI Cut
+
+> AI Cut edition of the OpenChatCut skill. AI Cut's **外部 Agent 接入 (MCP)** dialog (plug icon in the AI Cut top bar) normally registers
+> the `ai-cut` MCP server (with its token) for you; follow the setup steps below only when
+> the tools are missing.
+
+AI Cut is a local-first, agent-native video editor. This skill is the
+single external entry point; specialized editing guidance remains inside the
+running editor and is loaded on demand with `load_skill`.
+
+## Route the task
+
+- Install, connect, or diagnose the MCP server: read
+  `references/getting-started.md`.
+- Inspect or modify a project: read `references/editing-workflow.md`.
+- Recover from a failed tool call, stale session, or missing editor:
+  read `references/known-errors.md`.
+
+## Essentials
+
+1. Start AI Cut before connecting. The default MCP endpoint is
+   `http://127.0.0.1:5299/api/external-mcp/mcp`.
+2. Call `openchatcut_status`, then `list_projects`. Select a project only when
+   the user names it or the current context identifies it.
+3. Call `load_skill` before specialized work. It is read-only and requires
+   neither `begin_edit_session` nor `editSessionId`; available names and support
+   files come from the live MCP tool description.
+   With progressive exposure enabled, this call reveals the skill's referenced
+   tools and emits `tools/list_changed`; refresh the list before continuing.
+4. Before project reads or edits, call `begin_edit_session`. Keep its
+   `editSessionId` and pass it to every draft-safe editor tool.
+5. Set `reuseExisting: true` on `begin_edit_session` to reuse your active draft
+   or adopt an unchanged orphan. Existing operations and approval mode are kept.
+   If reuse is rejected, call `list_edit_sessions`. Use `recover_edit_session`
+   only with a listed `recoveryActions` value; another online owner must finish
+   or discard its own session.
+6. Use `approvalMode: "manual"` unless the user explicitly asks for unattended
+   application. In manual mode, the user approves the complete proposal in
+   AI Cut. In auto mode, `review_edit_session` applies the complete draft.
+7. Finish with `review_edit_session`. Report success only after
+   `get_edit_session` returns `applied`.
+
+## Skill version
+
+`2026-09-04.1`
+
+To update this skill, open the **外部 Agent 接入 (MCP)** dialog (plug icon in the AI Cut top bar) and press **Install / update**
+for this agent. AI Cut ships the matching skill version and rewrites it in place.

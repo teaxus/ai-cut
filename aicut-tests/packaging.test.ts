@@ -36,7 +36,8 @@ test('派生打包配置：身份、入口、版本、更新源、产物目录',
   assert.deepEqual(cfg.publish.map((p: { owner: string; repo: string }) => [p.owner, p.repo]), [[owner, repo]]);
   assert.equal(cfg.publish[0].channel, 'latest-arm64');
   assert.deepEqual(cfg.asarUnpack, base.asarUnpack);
-  assert.deepEqual(cfg.extraResources, base.extraResources);
+  assert.deepEqual(cfg.extraResources.slice(0, -1), base.extraResources, '上游的资源原样保留');
+  assert.deepEqual(cfg.extraResources.at(-1), { from: 'skills/ai-cut', to: 'aicut-skill' });
   for (const icon of [cfg.mac.icon, cfg.win.icon, cfg.linux.icon]) assert.ok(existsSync(new URL(`../${icon}`, import.meta.url)), icon);
 });
 

@@ -5,6 +5,7 @@
 // Getter reads keystore immediately - the next request will take effect after the setting panel is saved, no need to restart.
 import type { Plugin } from "vite";
 import { crossOriginIsolationPlugin } from "./cross-origin-isolation.ts";
+import { aicutServerPlugins } from "./aicut/index.ts"; // aicut-hook:IP-09
 import { storageLifecyclePlugin } from './storage-lifecycle.ts';
 import { projectStorePlugin } from "./project-store-plugin.ts";
 import { extensionStorePlugin } from "./extension-store.ts";
@@ -366,5 +367,6 @@ export function serverPlugins(options: { projectStoreHttp?: boolean } = {}): Plu
         return getKey("E2B_TEMPLATE") || undefined;
       },
     }),
+    ...aicutServerPlugins(), // aicut-hook:IP-09
   ];
 }

@@ -1,0 +1,18 @@
+interface:
+  display_name: "AI Cut"
+  short_description: "Connect and edit local AI Cut video projects"
+  brand_color: "#7C3AED"
+  icon_small: "./assets/ai-cut-icon.png"
+  icon_large: "./assets/ai-cut-icon.png"
+  default_prompt: "Use $ai-cut to connect to AI Cut and inspect the selected video project."
+
+dependencies:
+  tools:
+    - type: "mcp"
+      value: "ai-cut"
+      description: "AI Cut local editor MCP server"
+      transport: "streamable_http"
+      url: "http://127.0.0.1:5299/api/external-mcp/mcp"
+
+policy:
+  allow_implicit_invocation: true

@@ -49,6 +49,8 @@ show_help() {
                        例 --win-targets "nsis zip"（会以逗号形式传给远端）
   --pristine           用上游原样的打包配置（基线验证）/ build with upstream's own config (baseline)
   --dir                只出 win-unpacked 目录、不出安装包（仍回传整个目录的 zip）/ unpacked only
+  --proxy URL          远端构建用的 HTTP 代理（默认自动探测远端 127.0.0.1:7897 / 7890）/ remote build proxy
+  --smoke              打完后在远端静默安装 → 冒烟启动（含真实渲染）→ 卸载；smoke.log 随产物拉回 / install+smoke+uninstall
   --out-dir DIR        产物落盘目录 / where to save artifacts（默认 default: release-aicut/windows）
   --dry-run            只打印将执行的步骤，不实际连接 / print steps, do not connect
   --keep-remote        保留远端所有中间物：src.zip / out.zip / 构建目录（约 1GB），便于排查。
@@ -337,6 +339,8 @@ KEEP_REMOTE=0
 CN_MIRROR=0
 PRISTINE=0             # --pristine: 用上游原样的 electron-builder 配置
 DIST_DIR=0             # --dir: 只出 win-unpacked
+REMOTE_PROXY=""        # --proxy: 远端构建用的代理（空 = 远端自动探测）
+REMOTE_SMOKE=0         # --smoke: 远端安装后冒烟
 WIN_TARGETS=""         # 覆盖 electron-builder 的 win target（空 = 用 package.json 的 build.win.target）
 
 while [[ $# -gt 0 ]]; do
@@ -347,6 +351,8 @@ while [[ $# -gt 0 ]]; do
     --win-targets) WIN_TARGETS="${2:-}"; shift 2 ;;
     --pristine)  PRISTINE=1; shift ;;
     --dir)       DIST_DIR=1; shift ;;
+    --proxy)     REMOTE_PROXY="${2:-}"; shift 2 ;;
+    --smoke)     REMOTE_SMOKE=1; shift ;;
     --out-dir)   OUT_DIR="${2:-}"; shift 2 ;;
     --dry-run)   DRY_RUN=1; shift ;;
     --keep-remote) KEEP_REMOTE=1; shift ;;
@@ -594,6 +600,8 @@ REMOTE_CMD="powershell -NoProfile -ExecutionPolicy Bypass -File $REMOTE_PS1_NAME
 [[ $CN_MIRROR -eq 1 ]] && REMOTE_CMD="$REMOTE_CMD -CnMirror"
 [[ $PRISTINE -eq 1 ]] && REMOTE_CMD="$REMOTE_CMD -Pristine"
 [[ $DIST_DIR -eq 1 ]] && REMOTE_CMD="$REMOTE_CMD -DirOnly"
+[[ -n "$REMOTE_PROXY" ]] && REMOTE_CMD="$REMOTE_CMD -Proxy $REMOTE_PROXY"
+[[ $REMOTE_SMOKE -eq 1 ]] && REMOTE_CMD="$REMOTE_CMD -Smoke"
 [[ $KEEP_REMOTE -eq 1 ]] && REMOTE_CMD="$REMOTE_CMD -KeepWork"
 if [[ $DRY_RUN -eq 1 ]]; then
   echo "    (dry-run) ssh $TARGET \"$REMOTE_CMD\""

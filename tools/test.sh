@@ -15,7 +15,7 @@ show_help() {
 
 选项 / Options（选一个，默认 --all / pick one, default --all）:
   --all        上游 lint + 上游全量 npm test + 接入点标记检查 + 派生测试 / everything
-  --aicut      只跑接入点标记检查 + 派生测试（快）/ fork checks only (fast)
+  --aicut      只跑接入点标记检查 + 技能生成检查 + 派生测试（快）/ fork checks only (fast)
   --upstream   只跑上游 lint + npm test / upstream gate only
   --affected   上游按改动挑选的 verify（npm run verify:affected）+ 派生测试 / affected upstream verifies + fork tests
   测试文件     只跑指定的派生测试文件，如 aicut-tests/foo.test.ts / run only these fork test files
@@ -47,6 +47,8 @@ need_deps
 run_aicut() {
   say "接入点标记检查 / integration-point markers"
   node tools/lib/integration-points.mjs
+  say "skills/ai-cut 与上游技能一致 / generated skill in sync"
+  node tools/lib/sync-skill.mjs --check
   say "派生测试 / fork tests (aicut-tests)"
   if [[ ${#FILES[@]} -gt 0 ]]; then
     node --import tsx --test "${FILES[@]}"

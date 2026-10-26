@@ -23,6 +23,8 @@ export default {
   // 更新源换成派生仓库的 GitHub Releases（按架构分 channel 的做法沿用上游）。
   publish: base.publish.map((entry) => ({ ...entry, owner, repo })),
   files: [AICUT_ENTRY, ...base.files],
+  // 「Agent 接入」装进各 agent 的技能（tools/lib/sync-skill.mjs 从上游 skills/openchatcut 生成）
+  extraResources: [...base.extraResources, { from: 'skills/ai-cut', to: 'aicut-skill' }],
   // 写进安装包里 package.json 的字段：入口换成派生入口，版本号带派生修订号，应用名决定 userData 目录。
   extraMetadata: {
     name: 'ai-cut',
@@ -42,7 +44,15 @@ export default {
     // 有正式证书（CSC_LINK / CSC_NAME）时不覆盖，走 electron-builder 的正常签名。
     ...(process.env.CSC_LINK || process.env.CSC_NAME
       ? {}
-      : { sign: (opts) => signAsync({ ...opts, identity: '-', identityValidation: false }) }),
+      : {
+          // ad-hoc 签名不需要（也拿不到）Apple 时间戳，关掉可免去每个文件一次联网
+          sign: (opts) => signAsync({
+            ...opts,
+            identity: '-',
+            identityValidation: false,
+            optionsForFile: (file) => ({ ...(opts.optionsForFile?.(file) ?? {}), timestamp: 'none' }),
+          }),
+        }),
   },
   win: { ...base.win, icon: 'assets/aicut/icon.png' },
   linux: { ...base.linux, icon: 'assets/aicut/icon.png', executableName: 'ai-cut' },

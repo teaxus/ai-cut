@@ -1,0 +1,2557 @@
+{
+  "schemaVersion": 1,
+  "verifiedAt": "2026-10-25",
+  "skillsSource": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+  "agents": [
+    {
+      "id": "claude-code",
+      "name": "Claude Code",
+      "group": "A",
+      "skillsCliId": "claude-code",
+      "detect": {
+        "paths": [
+          "~/.claude"
+        ],
+        "commands": [
+          "claude"
+        ]
+      },
+      "skills": {
+        "global": "~/.claude/skills",
+        "supported": true,
+        "verified": true,
+        "source": "https://code.claude.com/docs/en/skills"
+      },
+      "mcp": {
+        "kind": "json",
+        "file": "~/.claude.json",
+        "container": [
+          "mcpServers"
+        ],
+        "entry": {
+          "type": "http",
+          "url": "{url}",
+          "headers": {
+            "Authorization": "Bearer {token}"
+          }
+        },
+        "verified": true,
+        "source": "https://code.claude.com/docs/en/mcp",
+        "note": "官方：用户级(User scope)服务存在 ~/.claude.json，type 也可写 streamable-http（官方别名）；推荐命令 claude mcp add --scope user --transport http。该文件是 Claude Code 自己频繁写入的状态文件，合并写入须原子写并保留其他键。设置了 CLAUDE_CONFIG_DIR 时官方只写明 settings/history/plugins 迁到该目录，.claude.json 是否随之迁移待验（本机 ~/.claude2/.claude.json 存在且含 mcpServers）。",
+        "cli": {
+          "command": "claude",
+          "install": [
+            "mcp",
+            "add-json",
+            "--scope",
+            "user",
+            "{name}",
+            "{json}"
+          ],
+          "uninstall": [
+            "mcp",
+            "remove",
+            "--scope",
+            "user",
+            "{name}"
+          ],
+          "note": "优先用 Claude Code 自己的命令写 ~/.claude.json（该文件是 Claude Code 运行时频繁写入的状态文件，直接改有并发覆盖风险）；命令不在 PATH 或失败时退回直接合并文件。"
+        }
+      }
+    },
+    {
+      "id": "codex",
+      "name": "Codex (CLI / Codex App)",
+      "group": "A",
+      "skillsCliId": "codex",
+      "detect": {
+        "paths": [
+          "~/.codex"
+        ],
+        "commands": [
+          "codex"
+        ],
+        "binaries": [
+          "~/.local/bin/codex",
+          "/Applications/ChatGPT.app/Contents/Resources/codex"
+        ],
+        "note": "binaries 取自上游 client-connect.ts；本机 /Applications/ChatGPT.app 内没有 codex，PATH 上也没有 codex，只有 ~/.codex 目录。"
+      },
+      "skills": {
+        "global": "~/.agents/skills",
+        "supported": true,
+        "verified": true,
+        "source": "https://developers.openai.com/codex/skills",
+        "note": "该 URL 308 跳转到 https://learn.chatgpt.com/docs/build-skills；官方页 USER 范围只写 $HOME/.agents/skills，不提 ~/.codex/skills（本机 ~/.codex/skills 存在且有手装 skill，疑为旧位置，待验是否仍被扫描）。"
+      },
+      "mcp": {
+        "kind": "toml-codex",
+        "file": "~/.codex/config.toml",
+        "container": [
+          "mcp_servers"
+        ],
+        "entry": {
+          "url": "{url}",
+          "http_headers": {
+            "Authorization": "Bearer {token}"
+          }
+        },
+        "verified": true,
+        "source": "https://developers.openai.com/codex/mcp ; https://developers.openai.com/codex/config-reference",
+        "note": "官方 config-reference：mcp_servers.<id>.url / bearer_token_env_var / http_headers(静态 header 表) / env_http_headers / http_headers_helper 均存在，因此可以直接把 Authorization 写进 [mcp_servers.ai-cut.http_headers]，不必依赖环境变量。推荐 http_headers：bearer_token_env_var 要求 Codex 进程能读到环境变量，而从 Dock/开始菜单启动的 GUI 应用通常读不到 ~/.zshrc（推断，待验；上游在 Windows 上为此改写用户环境变量并要求重启 Codex，见 client-connect.ts）。codex mcp add <name> --url ... --bearer-token-env-var ENV 的参数官方 CLI reference 已核实，但只能走环境变量。TOML 写法：[mcp_servers.ai-cut] 下 url=\"...\"，另起 [mcp_servers.ai-cut.http_headers] 下 Authorization=\"Bearer ...\"。"
+      }
+    },
+    {
+      "id": "cursor",
+      "name": "Cursor",
+      "group": "A",
+      "skillsCliId": "cursor",
+      "detect": {
+        "paths": [
+          "~/.cursor"
+        ],
+        "commands": [
+          "cursor"
+        ]
+      },
+      "skills": {
+        "global": "~/.cursor/skills",
+        "supported": true,
+        "verified": true,
+        "source": "https://cursor.com/docs/context/skills",
+        "note": "官方表同时列出 ~/.agents/skills 与 ~/.cursor/skills 为用户级(global)目录。"
+      },
+      "mcp": {
+        "kind": "json",
+        "file": "~/.cursor/mcp.json",
+        "container": [
+          "mcpServers"
+        ],
+        "entry": {
+          "url": "{url}",
+          "headers": {
+            "Authorization": "Bearer {token}"
+          }
+        },
+        "verified": true,
+        "source": "https://cursor.com/docs/context/mcp",
+        "note": "官方：全局文件 ~/.cursor/mcp.json，远程服务示例只有 url + headers（Authorization: Bearer ${env:NAME}），不带 type；上游 client-connect.ts 写的是 {type:\"http\",...} 并称实测可用，两种写法差异待验，这里取官方示例形式。本机 ~/.cursor 里只有 argv.json 与 extensions，mcp.json 尚不存在。"
+      }
+    },
+    {
+      "id": "gemini-cli",
+      "name": "Gemini CLI",
+      "group": "A",
+      "skillsCliId": "gemini-cli",
+      "detect": {
+        "paths": [
+          "~/.gemini/settings.json"
+        ],
+        "commands": [
+          "gemini"
+        ],
+        "note": "~/.gemini 目录与 Antigravity 共用；本机 settings.json 只有 mcpServers.pencil、gemini 命令不在 PATH，疑似被别的工具写入，不要仅凭目录判定已装。"
+      },
+      "skills": {
+        "global": "~/.gemini/skills",
+        "supported": true,
+        "verified": true,
+        "source": "https://geminicli.com/docs/cli/skills/",
+        "note": "官方(GitHub docs/cli/skills.md)：用户级为 ~/.gemini/skills/ 或其别名 ~/.agents/skills/，别名优先。"
+      },
+      "mcp": {
+        "kind": "json",
+        "file": "~/.gemini/settings.json",
+        "container": [
+          "mcpServers"
+        ],
+        "entry": {
+          "httpUrl": "{url}",
+          "headers": {
+            "Authorization": "Bearer {token}"
+          }
+        },
+        "verified": true,
+        "source": "https://raw.githubusercontent.com/google-gemini/gemini-cli/main/docs/tools/mcp-server.md",
+        "note": "官方：httpUrl=Streamable HTTP 端点，url=SSE 端点，headers=自定义请求头；type 字段官方页未记载。Gemini CLI 的 settings.json 是否允许注释待验，解析失败时降级为复制。"
+      }
+    },
+    {
+      "id": "antigravity",
+      "name": "Google Antigravity (App / IDE)",
+      "group": "A",
+      "skillsCliId": "antigravity",
+      "detect": {
+        "paths": [
+          "~/.gemini/config",
+          "~/.gemini/antigravity"
+        ],
+        "commands": [],
+        "note": "本机只有 ~/.gemini/antigravity/mcp_config.json（内容仅 pencil），没有 ~/.gemini/config；Antigravity 应用不在 /Applications，安装状态存疑。"
+      },
+      "skills": {
+        "global": "~/.gemini/config/skills",
+        "supported": true,
+        "verified": true,
+        "extra": [
+          "~/.gemini/antigravity/skills"
+        ],
+        "extraPolicy": "write-if-parent-exists",
+        "source": "https://antigravity.google/docs/skills",
+        "note": "官方：App 与 IDE 全局目录 ~/.gemini/config/skills/；旧版 IDE 目录 ~/.gemini/antigravity/skills/ 官方称“也支持”，vercel skills 表仍写旧目录。"
+      },
+      "mcp": {
+        "kind": "json",
+        "file": "~/.gemini/config/mcp_config.json",
+        "container": [
+          "mcpServers"
+        ],
+        "entry": {
+          "serverUrl": "{url}",
+          "headers": {
+            "Authorization": "Bearer {token}"
+          }
+        },
+        "extraFiles": [
+          "~/.gemini/antigravity/mcp_config.json"
+        ],
+        "extraFilesPolicy": "write-if-exists",
+        "verified": true,
+        "source": "https://antigravity.google/docs/mcp",
+        "note": "与上游冲突：官方 MCP 页写全局文件是 ~/.gemini/config/mcp_config.json（工作区 <workspace>/.agents/mcp_config.json），远程服务用 serverUrl（url 也可），并明确“不支持 httpUrl 字段与旧 HTTP+SSE 传输”；上游 client-connect.ts 写 ~/.gemini/antigravity/mcp_config.json + httpUrl。官方页完全没提旧路径，本机旧路径文件存在，所以主写官方路径、旧路径存在时同步写（字段统一用 serverUrl）。"
+      }
+    },
+    {
+      "id": "antigravity-cli",
+      "name": "Google Antigravity CLI",
+      "group": "A",
+      "skillsCliId": "antigravity-cli",
+      "detect": {
+        "paths": [
+          "~/.gemini/antigravity-cli"
+        ],
+        "commands": []
+      },
+      "skills": {
+        "global": "~/.gemini/antigravity-cli/skills",
+        "supported": true,
+        "verified": true,
+        "source": "https://antigravity.google/docs/skills"
+      },
+      "mcp": {
+        "kind": "json",
+        "file": "~/.gemini/config/mcp_config.json",
+        "container": [
+          "mcpServers"
+        ],
+        "entry": {
+          "serverUrl": "{url}",
+          "headers": {
+            "Authorization": "Bearer {token}"
+          }
+        },
+        "verified": true,
+        "source": "https://antigravity.google/docs/mcp",
+        "note": "官方 MCP 页 CLI 小节与 IDE 小节都指向全局 ~/.gemini/config/mcp_config.json，与 antigravity 条目是同一文件，写一次即可。"
+      }
+    },
+    {
+      "id": "qoder",
+      "name": "Qoder (国际版 IDE / CLI)",
+      "group": "A",
+      "skillsCliId": "qoder",
+      "detect": {
+        "paths": [
+          "~/.qoder"
+        ],
+        "commands": [],
+        "apps": [
+          "/Applications/Qoder IDE.app"
+        ]
+      },
+      "skills": {
+        "global": "~/.qoder/skills",
+        "supported": true,
+        "verified": true,
+        "source": "https://docs.qoder.com/cli/Skills"
+      },
+      "mcp": {
+        "kind": "json",
+        "file": "~/.qoder/settings.json",
+        "container": [
+          "mcpServers"
+        ],
+        "entry": {
+          "type": "http",
+          "url": "{url}",
+          "headers": {
+            "Authorization": "Bearer {token}"
+          }
+        },
+        "extraFiles": [
+          "~/.qoder/mcp.json"
+        ],
+        "extraFilesPolicy": "write-if-exists",
+        "verified": true,
+        "source": "https://docs.qoder.com/cli/mcp-reference.md ; https://docs.qoder.com/qoder/connectors.md",
+        "note": "官方：用户级 MCP 在 ~/.qoder/settings.json 的 mcpServers（connectors 页明确说 IDE 加的自定义 MCP 也存这里），http 类型字段 type/url/headers。本机冲突：IDE 1.29.0 的 ~/.qoder/settings.json 里没有 mcpServers，反而存在 ~/.qoder/mcp.json（mcpServers 为空），IDE 的用户级 MCP 文件路径由语言服务下发（bundle 内未写死），到底读哪个待验，所以主写 settings.json，mcp.json 存在时同步写。"
+      }
+    },
+    {
+      "id": "qoder-cn",
+      "name": "Qoder CN (国内版，原灵码)",
+      "group": "A",
+      "skillsCliId": "qoder-cn",
+      "detect": {
+        "paths": [
+          "~/.qoder-cn"
+        ],
+        "commands": []
+      },
+      "skills": {
+        "global": "~/.qoder-cn/skills",
+        "supported": true,
+        "verified": false,
+        "extra": [
+          "~/.lingma/skills"
+        ],
+        "extraPolicy": "write-if-parent-exists",
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "冲突：vercel 表 Qoder CN=~/.qoder-cn/skills；docs.qoder.cn/user-guide/skills.md 却写用户级 ~/.lingma/skills/（该页沿用灵码时代内容）。官方 Qoder CN 页未写 ~/.qoder-cn/skills，故 verified=false，两处都写（父目录存在时）。"
+      },
+      "mcp": {
+        "kind": "json",
+        "file": "~/.qoder-cn/settings.json",
+        "container": [
+          "mcpServers"
+        ],
+        "entry": {
+          "type": "http",
+          "url": "{url}",
+          "headers": {
+            "Authorization": "Bearer {token}"
+          }
+        },
+        "verified": true,
+        "source": "https://docs.qoder.cn/cli/mcp-reference.md ; https://docs.qoder.cn/cli/settings-reference.md",
+        "note": "国内版官方 CLI 页：用户级 ~/.qoder-cn/settings.json 的 mcpServers，环境变量 QODERCN_CONFIG_DIR 默认 ~/.qoder-cn；但 docs.qoder.cn/qoder/connectors.md 又写 ~/.qoder/settings.json（疑为国际版文档照搬）。上游同样把 .qoder-cn 当国内版目录。本机没有 ~/.qoder-cn，未实测。"
+      }
+    },
+    {
+      "id": "opencode",
+      "name": "OpenCode",
+      "group": "A",
+      "skillsCliId": "opencode",
+      "detect": {
+        "paths": [
+          "~/.config/opencode"
+        ],
+        "commands": [
+          "opencode"
+        ]
+      },
+      "skills": {
+        "global": "~/.config/opencode/skills",
+        "supported": true,
+        "verified": true,
+        "source": "https://opencode.ai/docs/skills",
+        "note": "官方同时列出全局 ~/.claude/skills 与 ~/.agents/skills 也会被扫描。"
+      },
+      "mcp": {
+        "kind": "json",
+        "file": "~/.config/opencode/opencode.json",
+        "container": [
+          "mcp"
+        ],
+        "entry": {
+          "type": "remote",
+          "url": "{url}",
+          "headers": {
+            "Authorization": "Bearer {token}"
+          },
+          "enabled": true
+        },
+        "verified": true,
+        "source": "https://opencode.ai/docs/mcp-servers/ ; https://opencode.ai/docs/config/",
+        "note": "官方：全局配置 ~/.config/opencode/opencode.json，格式支持 JSON 与 JSONC；根键 mcp；远程服务 type 必须是 \"remote\"。官方页没给 Windows 全局路径（待验，暂按 ~/.config/opencode）。用户若用的是 opencode.jsonc 或文件含注释，应降级为复制。"
+      }
+    },
+    {
+      "id": "windsurf",
+      "name": "Windsurf (Devin Desktop 前身)",
+      "group": "A",
+      "skillsCliId": "windsurf",
+      "detect": {
+        "paths": [
+          "~/.codeium/windsurf",
+          "~/.config/devin"
+        ],
+        "commands": [],
+        "note": "本机只有 ~/.codeium/windsurf/mcp_config.json（mcpServers 为空），无应用本体。"
+      },
+      "skills": {
+        "global": "~/.codeium/windsurf/skills",
+        "supported": true,
+        "verified": true,
+        "extra": [
+          "~/.config/devin/skills"
+        ],
+        "extraPolicy": "write-if-parent-exists",
+        "source": "https://docs.devin.ai/desktop/cascade/skills",
+        "note": "官方：全局 ~/.codeium/windsurf/skills/ 或 ~/.config/devin/skills/；另外也发现 ~/.agents/skills/。"
+      },
+      "mcp": {
+        "kind": "json",
+        "file": "~/.codeium/windsurf/mcp_config.json",
+        "container": [
+          "mcpServers"
+        ],
+        "entry": {
+          "serverUrl": "{url}",
+          "headers": {
+            "Authorization": "Bearer {token}"
+          }
+        },
+        "extraFiles": [
+          "~/.config/devin/mcp_config.json",
+          "~/.codeium/windsurf-next/mcp_config.json",
+          "~/.codeium/windsurf-insiders/mcp_config.json"
+        ],
+        "extraFilesPolicy": "write-if-exists",
+        "verified": true,
+        "source": "https://docs.devin.ai/cli/reference/configuration/read-config-from.md ; https://docs.devin.ai/desktop/cascade/mcp",
+        "note": "Windsurf 的文档已并入 Devin(docs.windsurf.com 307 到 docs.devin.ai)。官方 Devin CLI 页的“配置导入”表写 Windsurf MCP 在 ~/.codeium/<channel>/mcp_config.json（stable 渠道=windsurf，另有 windsurf-next / windsurf-insiders）；而 Cascade MCP 页说“本页只适用于旧版 Cascade 智能体”，其文件在 ~/.config/devin/mcp_config.json（Windows %APPDATA%\\devin\\）。远程服务字段 serverUrl（url 也可）+ headers，支持 ${env:VAR} 插值。"
+      }
+    },
+    {
+      "id": "kiro",
+      "name": "Kiro (IDE / CLI)",
+      "group": "A",
+      "skillsCliId": "kiro-cli",
+      "detect": {
+        "paths": [
+          "~/.kiro"
+        ],
+        "commands": [
+          "kiro-cli",
+          "kiro"
+        ],
+        "note": "本机只有 ~/.kiro/settings/mcp.json（仅 pencil），无应用本体。"
+      },
+      "skills": {
+        "global": "~/.kiro/skills",
+        "supported": true,
+        "verified": true,
+        "source": "https://kiro.dev/docs/skills/",
+        "note": "官方：IDE 与 CLI 都读 ~/.kiro/skills/；CLI 自定义 agent 需在 resources 里加 skill://.kiro/skills/**/SKILL.md。"
+      },
+      "mcp": {
+        "kind": "json",
+        "file": "~/.kiro/settings/mcp.json",
+        "container": [
+          "mcpServers"
+        ],
+        "entry": {
+          "url": "{url}",
+          "headers": {
+            "Authorization": "Bearer {token}"
+          }
+        },
+        "verified": true,
+        "source": "https://kiro.dev/docs/mcp/configuration/",
+        "note": "官方：用户级 ~/.kiro/settings/mcp.json（工作区 .kiro/settings/mcp.json 优先），远程服务 url + headers，${VAR} 插值且仅展开“已批准”的环境变量。风险：官方写 url 须为 HTTPS“或 localhost 的 HTTP”，只点名 localhost，没写 127.0.0.1 是否放行（待验；Gemini 称放行但无来源，不采信），AI Cut 的 URL 是 http://127.0.0.1，必要时改用 http://localhost。官方页未提 Streamable HTTP 字样；CLI 读取该全局文件的条件(includeMcpJson)见 kiro.dev/docs/custom-agents/configuration-reference/。"
+      }
+    },
+    {
+      "id": "github-copilot-cli",
+      "name": "GitHub Copilot CLI",
+      "group": "A",
+      "skillsCliId": "github-copilot",
+      "detect": {
+        "paths": [
+          "~/.copilot"
+        ],
+        "commands": [
+          "copilot"
+        ]
+      },
+      "skills": {
+        "global": "~/.copilot/skills",
+        "supported": true,
+        "verified": true,
+        "source": "https://docs.github.com/en/copilot/concepts/agents/about-agent-skills",
+        "note": "官方：个人 skills 在 ~/.copilot/skills 与 ~/.agents/skills；页面同时强调支持位置因产品(CLI/VS Code/云端 agent)而异。"
+      },
+      "mcp": {
+        "kind": "json",
+        "file": "~/.copilot/mcp-config.json",
+        "container": [
+          "mcpServers"
+        ],
+        "entry": {
+          "type": "http",
+          "url": "{url}",
+          "headers": {
+            "Authorization": "Bearer {token}"
+          },
+          "tools": [
+            "*"
+          ]
+        },
+        "verified": true,
+        "source": "https://docs.github.com/en/copilot/how-tos/copilot-cli/customize-copilot/add-mcp-servers",
+        "note": "官方：编辑 ~/.copilot/mcp-config.json；远程服务 type:\"http\"、url、headers、tools（\"*\" 为全部）；官方页未写 headers 的环境变量插值语法，也没提 COPILOT_HOME。本机 ~/.copilot 只有 config.json(非严格 JSON)、ide、logs，mcp-config.json 尚不存在。"
+      }
+    },
+    {
+      "id": "cline",
+      "name": "Cline",
+      "group": "A",
+      "skillsCliId": "cline",
+      "detect": {
+        "paths": [
+          "~/.cline"
+        ],
+        "commands": [
+          "cline"
+        ],
+        "note": "本机 ~/.cline/data 含 globalState.json，VS Code globalStorage 里没有 saoudrizwan.claude-dev，故是 Cline CLI/独立版。"
+      },
+      "skills": {
+        "global": "~/.cline/skills",
+        "supported": true,
+        "verified": true,
+        "source": "https://docs.cline.bot/features/skills",
+        "note": "冲突：vercel 表把 Cline 记为 ~/.agents/skills；Cline 官方页写全局 ~/.cline/skills/（Windows C:\\Users\\USERNAME\\.cline\\skills\\），页面没提 ~/.agents/skills。以官方为准。"
+      },
+      "mcp": {
+        "kind": "json",
+        "file": "~/.cline/data/settings/cline_mcp_settings.json",
+        "container": [
+          "mcpServers"
+        ],
+        "entry": {
+          "type": "streamableHttp",
+          "url": "{url}",
+          "headers": {
+            "Authorization": "Bearer {token}"
+          },
+          "disabled": false,
+          "autoApprove": []
+        },
+        "verified": true,
+        "source": "https://docs.cline.bot/mcp/configuring-mcp-servers",
+        "note": "官方：CLI 的文件是 ~/.cline/data/settings/cline_mcp_settings.json（可用 CLINE_MCP_SETTINGS_PATH 覆盖）；type 必须显式写 \"streamableHttp\"，省略会默认回退旧的 sse。VS Code 扩展版的文件路径官方页没写（只说在 UI 里 Configure MCP Servers 打开），待验，不登记。Gemini 给出的 transport:\"http\" 与官方 type:\"streamableHttp\" 不符，不采信。"
+      }
+    },
+    {
+      "id": "lingma",
+      "name": "通义灵码 Lingma",
+      "group": "A",
+      "skillsCliId": "lingma",
+      "detect": {
+        "paths": [
+          "~/.lingma"
+        ],
+        "commands": [],
+        "note": "灵码已更名 Qoder CN；本机 ~/.lingma 有 bin/1.4.10、extension/local，是老灵码插件。"
+      },
+      "skills": {
+        "global": "~/.lingma/skills",
+        "supported": true,
+        "verified": true,
+        "source": "https://docs.qoder.cn/user-guide/skills.md",
+        "note": "官方(docs.qoder.cn)：用户级 ~/.lingma/skills/{skill}/SKILL.md，手动拷入后需重启 IDE，输入 / 可见。"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://help.aliyun.com/zh/lingma/user-guide/guide-for-using-mcp",
+        "note": "灵码官方 MCP 页只讲个人设置里“手工添加/配置文件添加”，只支持 STDIO 与 SSE，未写配置文件路径、未提 Streamable HTTP 与自定义请求头；页面自述内容可能过期并指向 docs.qoder.cn。查不清，只给复制说明。"
+      }
+    },
+    {
+      "id": "claude-desktop",
+      "name": "Claude Desktop",
+      "group": "A",
+      "detect": {
+        "paths": [
+          "~/Library/Application Support/Claude",
+          "{APPDATA}/Claude"
+        ],
+        "commands": [],
+        "apps": [
+          "/Applications/Claude.app"
+        ]
+      },
+      "skills": {
+        "global": null,
+        "supported": false,
+        "verified": true,
+        "source": "https://support.claude.com/en/articles/12512180-using-skills-in-claude",
+        "note": "官方：自定义 Skill 只能在 Customize > Skills 里上传 ZIP，没有本地目录。要让 Claude Code(桌面版里的 Code) 用，请装到 ~/.claude/skills。"
+      },
+      "mcp": {
+        "kind": "copy",
+        "file": {
+          "darwin": "~/Library/Application Support/Claude/claude_desktop_config.json",
+          "win32": "{APPDATA}/Claude/claude_desktop_config.json",
+          "linux": null
+        },
+        "container": [
+          "mcpServers"
+        ],
+        "entry": {
+          "command": "npx",
+          "args": [
+            "-y",
+            "mcp-remote",
+            "{url}",
+            "--allow-http",
+            "--header",
+            "Authorization:${AUTH_HEADER}"
+          ],
+          "env": {
+            "AUTH_HEADER": "Bearer {token}"
+          }
+        },
+        "verified": true,
+        "source": "https://modelcontextprotocol.io/docs/develop/connect-local-servers ; https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp ; https://github.com/geelen/mcp-remote",
+        "note": "AI Cut 不自动写入：Claude Desktop 的配置文件只能放本地（stdio）服务，接 AI Cut 需要用 npx 运行第三方桥接包 mcp-remote，每次启动 Claude Desktop 都会联网下载执行它；由用户确认后自行粘贴。 原注：官方：claude_desktop_config.json 只用于本地(stdio)服务；远程自定义连接器(Customize > Connectors，支持 Request headers)由 Anthropic 云端发起连接，连不到本机 127.0.0.1，所以不能直接写 url。可行做法是用第三方 stdio 桥 mcp-remote（需用户装 Node/npx；--allow-http 用于 http URL；header 值放进 env 避免 args 里的空格在 Windows 被拆，见 mcp-remote README）。桥接写法出自 mcp-remote 仓库而非 Anthropic 文档，路径与容器键出自 MCP 官方文档。官方只给 macOS/Windows 路径，Linux 未写。"
+      }
+    },
+    {
+      "id": "trae",
+      "name": "Trae",
+      "group": "B",
+      "skillsCliId": "trae",
+      "detect": {
+        "paths": [
+          "~/.trae",
+          "~/Library/Application Support/Trae"
+        ],
+        "commands": []
+      },
+      "skills": {
+        "global": "~/.trae/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "国际版文档页(docs.trae.ai)是 SPA，抓不到正文，沿用 vercel 表；同族国内版官方页已核实 ~/.trae-cn/skills。"
+      },
+      "mcp": {
+        "kind": "copy",
+        "file": null,
+        "container": [
+          "mcpServers"
+        ],
+        "entry": {
+          "url": "{url}",
+          "headers": {
+            "Authorization": "Bearer {token}"
+          }
+        },
+        "verified": false,
+        "source": "https://docs.trae.cn/ide/add-mcp-servers",
+        "note": "国内版官方页：HTTP 类型 MCP 配置有 url(必填) + headers(可选，自定义请求头)，无 type 字段；全局 mcp.json 路径官方页没给（仅项目级 .trae/mcp.json）。Gemini 称全局是 ~/Library/Application Support/Trae/User/mcp.json，无来源，不采信。国际版页面抓不到，故 verified=false，只给复制。"
+      }
+    },
+    {
+      "id": "trae-cn",
+      "name": "Trae CN",
+      "group": "B",
+      "skillsCliId": "trae-cn",
+      "detect": {
+        "paths": [
+          "~/.trae-cn",
+          "~/Library/Application Support/Trae CN"
+        ],
+        "commands": []
+      },
+      "skills": {
+        "global": "~/.trae-cn/skills",
+        "supported": true,
+        "verified": true,
+        "source": "https://docs.trae.cn/ide/skills"
+      },
+      "mcp": {
+        "kind": "copy",
+        "file": null,
+        "container": [
+          "mcpServers"
+        ],
+        "entry": {
+          "url": "{url}",
+          "headers": {
+            "Authorization": "Bearer {token}"
+          }
+        },
+        "verified": true,
+        "source": "https://docs.trae.cn/ide/add-mcp-servers",
+        "note": "官方页写了 url + headers 字段，但没给全局 mcp.json 文件路径，所以只能让用户在 Trae 界面“添加 MCP Server”里粘贴（项目级可写 .trae/mcp.json）。"
+      }
+    },
+    {
+      "id": "qwen-code",
+      "name": "Qwen Code",
+      "group": "B",
+      "skillsCliId": "qwen-code",
+      "detect": {
+        "paths": [
+          "~/.qwen"
+        ],
+        "commands": [
+          "qwen"
+        ]
+      },
+      "skills": {
+        "global": "~/.qwen/skills",
+        "supported": true,
+        "verified": true,
+        "source": "https://qwenlm.github.io/qwen-code-docs/en/users/features/skills/",
+        "note": "官方：同时读 ~/.agents/skills，同名时 ~/.qwen/skills 优先。"
+      },
+      "mcp": {
+        "kind": "json",
+        "file": "~/.qwen/settings.json",
+        "container": [
+          "mcpServers"
+        ],
+        "entry": {
+          "httpUrl": "{url}",
+          "headers": {
+            "Authorization": "Bearer {token}"
+          }
+        },
+        "verified": true,
+        "source": "https://qwenlm.github.io/qwen-code-docs/en/users/features/mcp/",
+        "note": "官方：User scope(默认) ~/.qwen/settings.json；httpUrl=Streamable HTTP，url=SSE，headers 自定义请求头；官方 Authorization 示例就是 httpUrl 形式。"
+      }
+    },
+    {
+      "id": "iflow-cli",
+      "name": "iFlow CLI",
+      "group": "B",
+      "skillsCliId": "iflow-cli",
+      "detect": {
+        "paths": [
+          "~/.iflow"
+        ],
+        "commands": [
+          "iflow"
+        ]
+      },
+      "skills": {
+        "global": "~/.iflow/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "json",
+        "file": "~/.iflow/settings.json",
+        "container": [
+          "mcpServers"
+        ],
+        "entry": {
+          "httpUrl": "{url}",
+          "headers": {
+            "Authorization": "Bearer {token}"
+          }
+        },
+        "verified": false,
+        "source": "https://platform.iflow.cn/en/cli/examples/mcp",
+        "note": "官方页已核实 settings 路径 ~/.iflow/settings.json 与根键 mcpServers，也确认命令 iflow mcp add --transport http <name> <url> --header \"Authorization: Bearer ...\"；但页面没写远程服务在 settings.json 里的字段名，httpUrl/headers 是按 Gemini CLI 同源推断，待验，建议只给复制或改用命令。"
+      }
+    },
+    {
+      "id": "codebuddy",
+      "name": "CodeBuddy",
+      "group": "B",
+      "skillsCliId": "codebuddy",
+      "detect": {
+        "paths": [
+          "~/.codebuddy"
+        ],
+        "commands": [
+          "codebuddy"
+        ]
+      },
+      "skills": {
+        "global": "~/.codebuddy/skills",
+        "supported": true,
+        "verified": true,
+        "source": "https://www.codebuddy.cn/docs/cli/skills",
+        "note": "官方页属 CLI 文档，是否同样适用 IDE 版页面没写。"
+      },
+      "mcp": {
+        "kind": "json",
+        "file": "~/.codebuddy/.mcp.json",
+        "container": [
+          "mcpServers"
+        ],
+        "entry": {
+          "type": "http",
+          "url": "{url}",
+          "headers": {
+            "Authorization": "Bearer {token}"
+          }
+        },
+        "verified": true,
+        "source": "https://www.codebuddy.cn/docs/cli/mcp",
+        "note": "官方：用户级按优先级取第一个存在的文件：~/.codebuddy/.mcp.json(推荐) > ~/.codebuddy/mcp.json(已弃用) > ~/.codebuddy.json(旧)。若只存在后两者之一，新建 .mcp.json 会使旧文件里的服务不再生效，App 应改写那个已存在的文件。http 类型字段 type 固定 \"http\"、url、headers。"
+      }
+    },
+    {
+      "id": "roo",
+      "name": "Roo Code",
+      "group": "B",
+      "skillsCliId": "roo",
+      "detect": {
+        "paths": [
+          "~/.roo"
+        ],
+        "commands": []
+      },
+      "skills": {
+        "global": "~/.roo/skills",
+        "supported": true,
+        "verified": true,
+        "source": "https://roocodeinc.github.io/Roo-Code/features/skills",
+        "note": "官方：macOS/Linux ~/.roo/skills/{name}/SKILL.md，Windows %USERPROFILE%\\.roo\\skills\\；SKILL.md 的 name 必须与目录名一致。docs.roocode.com 301 到该地址。"
+      },
+      "mcp": {
+        "kind": "copy",
+        "file": null,
+        "container": [
+          "mcpServers"
+        ],
+        "entry": {
+          "type": "streamable-http",
+          "url": "{url}",
+          "headers": {
+            "Authorization": "Bearer {token}"
+          }
+        },
+        "verified": true,
+        "source": "https://roocodeinc.github.io/Roo-Code/features/mcp/using-mcp-in-roo",
+        "note": "官方：全局文件叫 mcp_settings.json（UI 里 Edit Global MCP 打开），项目级 .roo/mcp.json；官方页没写全局文件的磁盘路径（在 VS Code globalStorage 里），所以只给复制。远程 Streamable HTTP：type 必须是 \"streamable-http\"。Gemini 给的 transport:\"http\" 与官方不符，不采信。"
+      }
+    },
+    {
+      "id": "kilo",
+      "name": "Kilo Code",
+      "group": "B",
+      "skillsCliId": "kilo",
+      "detect": {
+        "paths": [
+          "~/.kilo",
+          "~/.config/kilo"
+        ],
+        "commands": [
+          "kilo"
+        ]
+      },
+      "skills": {
+        "global": "~/.kilo/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "jsonc",
+        "file": "~/.config/kilo/kilo.jsonc",
+        "container": [
+          "mcp"
+        ],
+        "entry": {
+          "type": "remote",
+          "url": "{url}",
+          "headers": {
+            "Authorization": "Bearer {token}"
+          },
+          "enabled": true
+        },
+        "verified": true,
+        "source": "https://kilo.ai/docs/automate/mcp/using-in-kilo-code",
+        "note": "官方：Kilo CLI 全局配置 ~/.config/kilo/kilo.jsonc（也接受 kilo.json），根键 mcp，远程服务 type:\"remote\"、url、headers。VS Code 扩展版官方页只说在 Settings → MCP 里加，未给文件路径。含注释，只给复制。"
+      }
+    },
+    {
+      "id": "continue",
+      "name": "Continue",
+      "group": "B",
+      "skillsCliId": "continue",
+      "detect": {
+        "paths": [
+          "~/.continue"
+        ],
+        "commands": []
+      },
+      "skills": {
+        "global": "~/.continue/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "yaml-dropin",
+        "file": "~/.continue/mcpServers/ai-cut.yaml",
+        "container": [
+          "mcpServers"
+        ],
+        "entry": {
+          "name": "ai-cut",
+          "type": "streamable-http",
+          "url": "{url}",
+          "requestOptions": {
+            "headers": {
+              "Authorization": "Bearer {token}"
+            }
+          }
+        },
+        "template": "name: AI Cut MCP\nversion: 0.0.1\nschema: v1\nmcpServers:\n  - name: ai-cut\n    type: streamable-http\n    url: {url}\n    requestOptions:\n      headers:\n        Authorization: Bearer {token}\n",
+        "verified": false,
+        "source": "https://docs.continue.dev/customize/deep-dives/mcp ; https://docs.continue.dev/reference",
+        "note": "官方 MCP 页只写了工作区级 .continue/mcpServers/ 放独立 YAML（含 name/version/schema 元数据），streamable-http 类型写法已核实；全局 ~/.continue/mcpServers/ 是否被加载官方页没写，requestOptions 官方 reference 只写“与模型 requestOptions 同格式”(含 headers)，Authorization 这么写是推断，故 verified=false。"
+      }
+    },
+    {
+      "id": "goose",
+      "name": "Goose",
+      "group": "B",
+      "skillsCliId": "goose",
+      "detect": {
+        "paths": [
+          "~/.config/goose",
+          "{APPDATA}/Block/goose"
+        ],
+        "commands": [
+          "goose"
+        ]
+      },
+      "skills": {
+        "global": "~/.config/goose/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "copy",
+        "file": {
+          "darwin": "~/.config/goose/config.yaml",
+          "linux": "~/.config/goose/config.yaml",
+          "win32": "{APPDATA}/Block/goose/config/config.yaml"
+        },
+        "container": [
+          "extensions"
+        ],
+        "entry": {
+          "type": "streamable_http",
+          "name": "ai-cut",
+          "enabled": true,
+          "uri": "{url}",
+          "headers": {
+            "Authorization": "Bearer {token}"
+          },
+          "envs": {},
+          "env_keys": [],
+          "timeout": 300
+        },
+        "verified": true,
+        "source": "https://goose-docs.ai/docs/guides/config-files ; https://goose-docs.ai/docs/getting-started/using-extensions",
+        "note": "官方：配置是 YAML 的 extensions 表，streamable_http 扩展字段 uri / headers / envs / env_keys / timeout；App 不改 YAML，只给复制（对应 extensions.ai-cut 下的键）。官方页没写 Authorization 头的具体取值格式，上面是按 headers 键值表推出的写法。也可用 goose configure → Remote Extension (Streamable HTTP) 交互添加。"
+      }
+    },
+    {
+      "id": "zed",
+      "name": "Zed",
+      "group": "B",
+      "skillsCliId": "zed",
+      "detect": {
+        "paths": [
+          "~/.config/zed",
+          "{APPDATA}/Zed"
+        ],
+        "commands": [
+          "zed"
+        ]
+      },
+      "skills": {
+        "global": "~/.agents/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "来自 vercel 表，Zed 官方文档页未核实。"
+      },
+      "mcp": {
+        "kind": "jsonc",
+        "file": {
+          "darwin": "~/.config/zed/settings.json",
+          "linux": "~/.config/zed/settings.json",
+          "win32": "{APPDATA}/Zed/settings.json"
+        },
+        "container": [
+          "context_servers"
+        ],
+        "entry": {
+          "url": "{url}",
+          "headers": {
+            "Authorization": "Bearer {token}"
+          }
+        },
+        "verified": true,
+        "source": "https://zed.dev/docs/ai/mcp ; https://raw.githubusercontent.com/zed-industries/zed/main/docs/src/configuring-zed.md",
+        "note": "官方：根键 context_servers，远程服务 url + headers（例子无 type），没配 Authorization 时 Zed 会走 MCP OAuth；settings.json 官方称“JSON，支持 // 注释”，App 不改，只给复制。Linux 还可能受 $XDG_CONFIG_HOME 影响。"
+      }
+    },
+    {
+      "id": "amp",
+      "name": "Amp",
+      "group": "B",
+      "skillsCliId": "amp",
+      "detect": {
+        "paths": [
+          "~/.config/amp"
+        ],
+        "commands": [
+          "amp"
+        ]
+      },
+      "skills": {
+        "global": "~/.config/agents/skills",
+        "supported": true,
+        "verified": true,
+        "source": "https://ampcode.com/docs/customize/skills",
+        "note": "官方：--global 安装到 ~/.config/agents/skills/；同时扫描 ~/.config/amp/skills、~/.agents/skills；项目级 .agents/skills。"
+      },
+      "mcp": {
+        "kind": "jsonc",
+        "file": "~/.config/amp/settings.json",
+        "container": [
+          "amp.mcpServers"
+        ],
+        "entry": {
+          "url": "{url}",
+          "headers": {
+            "Authorization": "Bearer {token}"
+          }
+        },
+        "verified": true,
+        "source": "https://ampcode.com/docs/customize/mcp ; https://ampcode.com/docs/cli/settings",
+        "note": "官方：用户设置文件 ~/.config/amp/settings.json 或 settings.jsonc（Windows %USERPROFILE%\\.config\\amp\\），键名就是带点号的 \"amp.mcpServers\"（字面量，不是嵌套 amp→mcpServers）；远程服务 url + headers，${VAR} 插值。.json 与 .jsonc 都可能含注释，只给复制。amp mcp add 命令官方页没有 --header 选项。"
+      }
+    },
+    {
+      "id": "crush",
+      "name": "Crush",
+      "group": "B",
+      "skillsCliId": "crush",
+      "detect": {
+        "paths": [
+          "~/.config/crush"
+        ],
+        "commands": [
+          "crush"
+        ]
+      },
+      "skills": {
+        "global": "~/.config/crush/skills",
+        "supported": true,
+        "verified": true,
+        "source": "https://raw.githubusercontent.com/charmbracelet/crush/main/README.md",
+        "note": "官方 README：$XDG_CONFIG_HOME/crush/skills 或 ~/.config/crush/skills/；项目级 .crush/skills。"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [
+          "mcp"
+        ],
+        "entry": null,
+        "verified": false,
+        "source": "https://raw.githubusercontent.com/charmbracelet/crush/main/README.md",
+        "note": "官方 README 说配置已迁到 crushrc 文件(./.crushrc、~/.config/crush/crushrc)，JSON 格式“仍支持但视为弃用”；README 的 JSON 示例有 mcp.<name>.type=http + url，但没给 headers 写法，crushrc 里的 MCP 语法也没抓全。查不清，不自动写。"
+      }
+    },
+    {
+      "id": "droid",
+      "name": "Factory Droid",
+      "group": "B",
+      "skillsCliId": "droid",
+      "detect": {
+        "paths": [
+          "~/.factory"
+        ],
+        "commands": [
+          "droid"
+        ]
+      },
+      "skills": {
+        "global": "~/.factory/skills",
+        "supported": true,
+        "verified": true,
+        "source": "https://docs.factory.com/cli/configuration/skills"
+      },
+      "mcp": {
+        "kind": "json",
+        "file": "~/.factory/mcp.json",
+        "container": [
+          "mcpServers"
+        ],
+        "entry": {
+          "type": "http",
+          "url": "{url}",
+          "headers": {
+            "Authorization": "Bearer {token}"
+          }
+        },
+        "verified": true,
+        "source": "https://docs.factory.com/cli/configuration/mcp",
+        "note": "官方：用户级 ~/.factory/mcp.json（项目 .factory/mcp.json 切勿放密钥）；http 类型 type/url/headers，headers 值支持 ${NAME} 环境变量展开；官方页没写 Windows 路径。docs.factory.ai 308 到 docs.factory.com。"
+      }
+    },
+    {
+      "id": "junie",
+      "name": "JetBrains Junie",
+      "group": "B",
+      "skillsCliId": "junie",
+      "detect": {
+        "paths": [
+          "~/.junie"
+        ],
+        "commands": [
+          "junie"
+        ]
+      },
+      "skills": {
+        "global": "~/.junie/skills",
+        "supported": true,
+        "verified": true,
+        "source": "https://junie.jetbrains.com/docs/agent-skills.html",
+        "note": "官方：macOS/Linux ~/.junie/skills/，Windows %USERPROFILE%\\.junie\\skills\\。"
+      },
+      "mcp": {
+        "kind": "json",
+        "file": "~/.junie/mcp/mcp.json",
+        "container": [
+          "mcpServers"
+        ],
+        "entry": {
+          "url": "{url}",
+          "headers": {
+            "Authorization": "Bearer {token}"
+          }
+        },
+        "verified": true,
+        "source": "https://junie.jetbrains.com/docs/junie-cli-mcp-configuration.html",
+        "note": "官方 Junie CLI 页：用户级 ~/.junie/mcp/mcp.json，远程服务 url + headers（无 type 字段），可选 timeout。该页讲的是 Junie CLI，JetBrains IDE 里的 Junie 插件是否共用同一文件页面没写，待验。"
+      }
+    },
+    {
+      "id": "augment",
+      "name": "Augment (Auggie)",
+      "group": "B",
+      "skillsCliId": "augment",
+      "detect": {
+        "paths": [
+          "~/.augment"
+        ],
+        "commands": [
+          "auggie"
+        ]
+      },
+      "skills": {
+        "global": "~/.augment/skills",
+        "supported": true,
+        "verified": true,
+        "source": "https://docs.augmentcode.com/cli/skills",
+        "note": "官方还会扫描 ~/.claude/skills 与 ~/.agents/skills。"
+      },
+      "mcp": {
+        "kind": "json",
+        "file": "~/.augment/settings.json",
+        "container": [
+          "mcpServers"
+        ],
+        "entry": {
+          "type": "http",
+          "url": "{url}",
+          "headers": {
+            "Authorization": "Bearer {token}"
+          }
+        },
+        "verified": true,
+        "source": "https://docs.augmentcode.com/cli/integrations",
+        "note": "官方：Auggie 把 MCP 服务存在 ~/.augment/settings.json 的 mcpServers；http 类型 type/url/headers；命令 auggie mcp add <name> --transport http --url ... --header \"Authorization:Bearer ...\"。"
+      }
+    },
+    {
+      "id": "warp",
+      "name": "Warp",
+      "group": "B",
+      "skillsCliId": "warp",
+      "detect": {
+        "paths": [
+          "~/.warp"
+        ],
+        "commands": []
+      },
+      "skills": {
+        "global": "~/.agents/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "来自 vercel 表，Warp 官方文档页未核实。"
+      },
+      "mcp": {
+        "kind": "json",
+        "file": "~/.warp/.mcp.json",
+        "container": [
+          "mcpServers"
+        ],
+        "entry": {
+          "url": "{url}",
+          "headers": {
+            "Authorization": "Bearer {token}"
+          }
+        },
+        "verified": true,
+        "source": "https://docs.warp.dev/knowledge-and-collaboration/mcp",
+        "note": "官方：基于文件的 MCP 服务全局在 ~/.warp/.mcp.json（项目级 .warp/.mcp.json），远程服务 url + headers。风险：该页把 url 描述为“通过 SSE 连接的 HTTP 端点”，没明说支持 Streamable HTTP，待验；界面里添加的服务存在哪里页面没写。"
+      }
+    },
+    {
+      "id": "devin",
+      "name": "Devin CLI / Devin Desktop",
+      "group": "B",
+      "skillsCliId": "devin",
+      "detect": {
+        "paths": [
+          "~/.config/devin",
+          "{APPDATA}/devin"
+        ],
+        "commands": [
+          "devin"
+        ]
+      },
+      "skills": {
+        "global": "~/.config/devin/skills",
+        "supported": true,
+        "verified": true,
+        "source": "https://docs.devin.ai/desktop/cascade/skills",
+        "note": "官方：与 Windsurf 共用 ~/.config/devin/skills/（Devin CLI）。"
+      },
+      "mcp": {
+        "kind": "json",
+        "file": {
+          "darwin": "~/.config/devin/mcp_config.json",
+          "linux": "~/.config/devin/mcp_config.json",
+          "win32": "{APPDATA}/devin/mcp_config.json"
+        },
+        "container": [
+          "mcpServers"
+        ],
+        "entry": {
+          "url": "{url}",
+          "transport": "http",
+          "headers": {
+            "Authorization": "Bearer {token}"
+          }
+        },
+        "verified": true,
+        "source": "https://docs.devin.ai/cli/extensibility/mcp/configuration.md",
+        "note": "官方：全局 ~/.config/devin/mcp_config.json（可受 $XDG_CONFIG_HOME 影响），项目 .devin/mcp_config.json；http 服务字段 url(必填)、transport:\"http\"(URL 型默认值)、headers；官方页没给 Authorization 头示例，写法按字段表推出。"
+      }
+    },
+    {
+      "id": "aider-desk",
+      "name": "AiderDesk",
+      "group": "C",
+      "skillsCliId": "aider-desk",
+      "detect": {
+        "paths": [
+          "~/.aider-desk"
+        ],
+        "commands": []
+      },
+      "skills": {
+        "global": "~/.aider-desk/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "replit",
+      "name": "Replit",
+      "group": "C",
+      "skillsCliId": "replit",
+      "detect": {
+        "paths": [],
+        "commands": [],
+        "note": "与其他 agent 共用 ~/.config/agents/skills，无法单独探测"
+      },
+      "skills": {
+        "global": "~/.config/agents/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "universal",
+      "name": "Universal",
+      "group": "C",
+      "skillsCliId": "universal",
+      "detect": {
+        "paths": [],
+        "commands": [],
+        "note": "与其他 agent 共用 ~/.config/agents/skills，无法单独探测"
+      },
+      "skills": {
+        "global": "~/.config/agents/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "astrbot",
+      "name": "AstrBot",
+      "group": "C",
+      "skillsCliId": "astrbot",
+      "detect": {
+        "paths": [
+          "~/.astrbot/data"
+        ],
+        "commands": []
+      },
+      "skills": {
+        "global": "~/.astrbot/data/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "autohand-code",
+      "name": "Autohand Code CLI",
+      "group": "C",
+      "skillsCliId": "autohand-code",
+      "detect": {
+        "paths": [
+          "~/.autohand"
+        ],
+        "commands": []
+      },
+      "skills": {
+        "global": "~/.autohand/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "bob",
+      "name": "IBM Bob",
+      "group": "C",
+      "skillsCliId": "bob",
+      "detect": {
+        "paths": [
+          "~/.bob"
+        ],
+        "commands": []
+      },
+      "skills": {
+        "global": "~/.bob/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "openclaw",
+      "name": "OpenClaw",
+      "group": "C",
+      "skillsCliId": "openclaw",
+      "detect": {
+        "paths": [
+          "~/.openclaw"
+        ],
+        "commands": []
+      },
+      "skills": {
+        "global": "~/.openclaw/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "dexto",
+      "name": "Dexto",
+      "group": "C",
+      "skillsCliId": "dexto",
+      "detect": {
+        "paths": [],
+        "commands": [],
+        "note": "与其他 agent 共用 ~/.agents/skills，无法单独探测"
+      },
+      "skills": {
+        "global": "~/.agents/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "fx",
+      "name": "fx",
+      "group": "C",
+      "skillsCliId": "fx",
+      "detect": {
+        "paths": [],
+        "commands": [],
+        "note": "与其他 agent 共用 ~/.agents/skills，无法单独探测"
+      },
+      "skills": {
+        "global": "~/.agents/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "kimi-code-cli",
+      "name": "Kimi Code CLI",
+      "group": "C",
+      "skillsCliId": "kimi-code-cli",
+      "detect": {
+        "paths": [],
+        "commands": [],
+        "note": "与其他 agent 共用 ~/.agents/skills，无法单独探测"
+      },
+      "skills": {
+        "global": "~/.agents/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "loaf",
+      "name": "Loaf",
+      "group": "C",
+      "skillsCliId": "loaf",
+      "detect": {
+        "paths": [],
+        "commands": [],
+        "note": "与其他 agent 共用 ~/.agents/skills，无法单独探测"
+      },
+      "skills": {
+        "global": "~/.agents/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "pi",
+      "name": "Pi",
+      "group": "C",
+      "skillsCliId": "pi",
+      "detect": {
+        "paths": [],
+        "commands": [],
+        "note": "与其他 agent 共用 ~/.agents/skills，无法单独探测"
+      },
+      "skills": {
+        "global": "~/.agents/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "sarvam-code",
+      "name": "Sarvam Code",
+      "group": "C",
+      "skillsCliId": "sarvam-code",
+      "detect": {
+        "paths": [],
+        "commands": [],
+        "note": "与其他 agent 共用 ~/.agents/skills，无法单独探测"
+      },
+      "skills": {
+        "global": "~/.agents/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "codearts-agent",
+      "name": "CodeArts Agent",
+      "group": "C",
+      "skillsCliId": "codearts-agent",
+      "detect": {
+        "paths": [
+          "~/.codeartsdoer"
+        ],
+        "commands": []
+      },
+      "skills": {
+        "global": "~/.codeartsdoer/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "codemaker",
+      "name": "Codemaker",
+      "group": "C",
+      "skillsCliId": "codemaker",
+      "detect": {
+        "paths": [
+          "~/.codemaker"
+        ],
+        "commands": []
+      },
+      "skills": {
+        "global": "~/.codemaker/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "codestudio",
+      "name": "Code Studio",
+      "group": "C",
+      "skillsCliId": "codestudio",
+      "detect": {
+        "paths": [
+          "~/.codestudio"
+        ],
+        "commands": []
+      },
+      "skills": {
+        "global": "~/.codestudio/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "command-code",
+      "name": "Command Code",
+      "group": "C",
+      "skillsCliId": "command-code",
+      "detect": {
+        "paths": [
+          "~/.commandcode"
+        ],
+        "commands": []
+      },
+      "skills": {
+        "global": "~/.commandcode/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "cortex",
+      "name": "Cortex Code",
+      "group": "C",
+      "skillsCliId": "cortex",
+      "detect": {
+        "paths": [
+          "~/.snowflake/cortex"
+        ],
+        "commands": []
+      },
+      "skills": {
+        "global": "~/.snowflake/cortex/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "deepagents",
+      "name": "Deep Agents",
+      "group": "C",
+      "skillsCliId": "deepagents",
+      "detect": {
+        "paths": [
+          "~/.deepagents/agent"
+        ],
+        "commands": []
+      },
+      "skills": {
+        "global": "~/.deepagents/agent/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "eve",
+      "name": "Eve",
+      "group": "C",
+      "skillsCliId": "eve",
+      "detect": {
+        "paths": [],
+        "commands": []
+      },
+      "skills": {
+        "global": null,
+        "supported": false,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "vercel 表标注仅项目级(project-only)，无全局目录 只有项目级 skills 目录（vercel skills 表：N/A project-only），AI Cut 只装全局，所以记为不支持。"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "firebender",
+      "name": "Firebender",
+      "group": "C",
+      "skillsCliId": "firebender",
+      "detect": {
+        "paths": [
+          "~/.firebender"
+        ],
+        "commands": []
+      },
+      "skills": {
+        "global": "~/.firebender/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "forgecode",
+      "name": "ForgeCode",
+      "group": "C",
+      "skillsCliId": "forgecode",
+      "detect": {
+        "paths": [
+          "~/.forge"
+        ],
+        "commands": []
+      },
+      "skills": {
+        "global": "~/.forge/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "grok",
+      "name": "Grok Build",
+      "group": "C",
+      "skillsCliId": "grok",
+      "detect": {
+        "paths": [
+          "~/.grok"
+        ],
+        "commands": []
+      },
+      "skills": {
+        "global": "~/.grok/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "hermes-agent",
+      "name": "Hermes Agent",
+      "group": "C",
+      "skillsCliId": "hermes-agent",
+      "detect": {
+        "paths": [
+          "~/.hermes"
+        ],
+        "commands": []
+      },
+      "skills": {
+        "global": "~/.hermes/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "inference-sh",
+      "name": "inference.sh",
+      "group": "C",
+      "skillsCliId": "inference-sh",
+      "detect": {
+        "paths": [
+          "~/.inferencesh"
+        ],
+        "commands": []
+      },
+      "skills": {
+        "global": "~/.inferencesh/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "jazz",
+      "name": "Jazz",
+      "group": "C",
+      "skillsCliId": "jazz",
+      "detect": {
+        "paths": [
+          "~/.jazz"
+        ],
+        "commands": []
+      },
+      "skills": {
+        "global": "~/.jazz/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "kimchi",
+      "name": "Kimchi",
+      "group": "C",
+      "skillsCliId": "kimchi",
+      "detect": {
+        "paths": [
+          "~/.config/kimchi/harness"
+        ],
+        "commands": []
+      },
+      "skills": {
+        "global": "~/.config/kimchi/harness/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "kode",
+      "name": "Kode",
+      "group": "C",
+      "skillsCliId": "kode",
+      "detect": {
+        "paths": [
+          "~/.kode"
+        ],
+        "commands": []
+      },
+      "skills": {
+        "global": "~/.kode/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "mcpjam",
+      "name": "MCPJam",
+      "group": "C",
+      "skillsCliId": "mcpjam",
+      "detect": {
+        "paths": [
+          "~/.mcpjam"
+        ],
+        "commands": []
+      },
+      "skills": {
+        "global": "~/.mcpjam/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "minimax-code",
+      "name": "MiniMax Code",
+      "group": "C",
+      "skillsCliId": "minimax-code",
+      "detect": {
+        "paths": [
+          "~/.minimax"
+        ],
+        "commands": []
+      },
+      "skills": {
+        "global": "~/.minimax/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "mistral-vibe",
+      "name": "Mistral Vibe",
+      "group": "C",
+      "skillsCliId": "mistral-vibe",
+      "detect": {
+        "paths": [
+          "~/.vibe"
+        ],
+        "commands": []
+      },
+      "skills": {
+        "global": "~/.vibe/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "moxby",
+      "name": "Moxby",
+      "group": "C",
+      "skillsCliId": "moxby",
+      "detect": {
+        "paths": [
+          "~/.moxby"
+        ],
+        "commands": []
+      },
+      "skills": {
+        "global": "~/.moxby/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "mux",
+      "name": "Mux",
+      "group": "C",
+      "skillsCliId": "mux",
+      "detect": {
+        "paths": [
+          "~/.mux"
+        ],
+        "commands": []
+      },
+      "skills": {
+        "global": "~/.mux/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "openhands",
+      "name": "OpenHands",
+      "group": "C",
+      "skillsCliId": "openhands",
+      "detect": {
+        "paths": [
+          "~/.openhands"
+        ],
+        "commands": []
+      },
+      "skills": {
+        "global": "~/.openhands/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "ona",
+      "name": "Ona",
+      "group": "C",
+      "skillsCliId": "ona",
+      "detect": {
+        "paths": [
+          "~/.ona"
+        ],
+        "commands": []
+      },
+      "skills": {
+        "global": "~/.ona/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "posit-assistant",
+      "name": "Posit Assistant",
+      "group": "C",
+      "skillsCliId": "posit-assistant",
+      "detect": {
+        "paths": [
+          "~/.posit/assistant"
+        ],
+        "commands": []
+      },
+      "skills": {
+        "global": "~/.posit/assistant/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "reasonix",
+      "name": "Reasonix",
+      "group": "C",
+      "skillsCliId": "reasonix",
+      "detect": {
+        "paths": [
+          "~/.reasonix"
+        ],
+        "commands": []
+      },
+      "skills": {
+        "global": "~/.reasonix/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "rovodev",
+      "name": "Rovo Dev",
+      "group": "C",
+      "skillsCliId": "rovodev",
+      "detect": {
+        "paths": [
+          "~/.rovodev"
+        ],
+        "commands": []
+      },
+      "skills": {
+        "global": "~/.rovodev/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "tabnine-cli",
+      "name": "Tabnine CLI",
+      "group": "C",
+      "skillsCliId": "tabnine-cli",
+      "detect": {
+        "paths": [
+          "~/.tabnine/agent"
+        ],
+        "commands": []
+      },
+      "skills": {
+        "global": "~/.tabnine/agent/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "terramind",
+      "name": "Terramind",
+      "group": "C",
+      "skillsCliId": "terramind",
+      "detect": {
+        "paths": [
+          "~/.terramind"
+        ],
+        "commands": []
+      },
+      "skills": {
+        "global": "~/.terramind/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "tinycloud",
+      "name": "Tinycloud",
+      "group": "C",
+      "skillsCliId": "tinycloud",
+      "detect": {
+        "paths": [
+          "~/.tinycloud"
+        ],
+        "commands": []
+      },
+      "skills": {
+        "global": "~/.tinycloud/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "zcode",
+      "name": "ZCode",
+      "group": "C",
+      "skillsCliId": "zcode",
+      "detect": {
+        "paths": [
+          "~/.zcode"
+        ],
+        "commands": []
+      },
+      "skills": {
+        "global": "~/.zcode/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "zencoder",
+      "name": "Zencoder",
+      "group": "C",
+      "skillsCliId": "zencoder",
+      "detect": {
+        "paths": [
+          "~/.zencoder"
+        ],
+        "commands": []
+      },
+      "skills": {
+        "global": "~/.zencoder/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "zenflow",
+      "name": "Zenflow",
+      "group": "C",
+      "skillsCliId": "zenflow",
+      "detect": {
+        "paths": [
+          "~/.zencoder"
+        ],
+        "commands": []
+      },
+      "skills": {
+        "global": "~/.zencoder/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "neovate",
+      "name": "Neovate",
+      "group": "C",
+      "skillsCliId": "neovate",
+      "detect": {
+        "paths": [
+          "~/.neovate"
+        ],
+        "commands": []
+      },
+      "skills": {
+        "global": "~/.neovate/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "pochi",
+      "name": "Pochi",
+      "group": "C",
+      "skillsCliId": "pochi",
+      "detect": {
+        "paths": [
+          "~/.pochi"
+        ],
+        "commands": []
+      },
+      "skills": {
+        "global": "~/.pochi/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "promptscript",
+      "name": "PromptScript",
+      "group": "C",
+      "skillsCliId": "promptscript",
+      "detect": {
+        "paths": [],
+        "commands": []
+      },
+      "skills": {
+        "global": null,
+        "supported": false,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "vercel 表标注仅项目级(project-only)，无全局目录 只有项目级 skills 目录（vercel skills 表：N/A project-only），AI Cut 只装全局，所以记为不支持。"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    },
+    {
+      "id": "adal",
+      "name": "AdaL",
+      "group": "C",
+      "skillsCliId": "adal",
+      "detect": {
+        "paths": [
+          "~/.adal"
+        ],
+        "commands": []
+      },
+      "skills": {
+        "global": "~/.adal/skills",
+        "supported": true,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md"
+      },
+      "mcp": {
+        "kind": "none",
+        "file": null,
+        "container": [],
+        "entry": null,
+        "verified": false,
+        "source": "https://github.com/vercel-labs/skills/blob/main/docs/agents.md",
+        "note": "仅登记 skills 目录，未调研 MCP。"
+      }
+    }
+  ]
+}
