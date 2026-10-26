@@ -45,7 +45,9 @@ async function readText(file: string): Promise<string | null> {
 
 async function backup(file: string, ctx: WriteContext): Promise<void> {
   if (!ctx.backupDir) return;
-  const target = path.join(ctx.backupDir, `${path.basename(path.dirname(file))}__${path.basename(file)}`);
+  // 文件名去掉开头的点（.codex/config.toml → codex__config.toml），否则在访达里看是空文件夹
+  const visible = (name: string) => name.replace(/^\.+/, '');
+  const target = path.join(ctx.backupDir, `${visible(path.basename(path.dirname(file)))}__${visible(path.basename(file))}`);
   await mkdir(ctx.backupDir, { recursive: true });
   await copyFile(file, target).catch((error: NodeJS.ErrnoException) => { if (error.code !== 'ENOENT') throw error; });
 }

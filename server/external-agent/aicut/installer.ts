@@ -119,6 +119,12 @@ function mcpTargets(agent: AgentDef, ctx: Ctx): string[] {
 }
 
 const AUTO_KINDS: readonly McpKind[] = ['json', 'toml-codex', 'yaml-dropin'];
+
+/** 注册表的 source 可能用 " ; " 连着几个出处，界面上的「配置说明」链接只用第一个。 */
+function firstUrl(source: string | undefined): string | undefined {
+  const first = source?.split(/\s*;\s*/)[0]?.trim();
+  return first && /^https?:\/\//.test(first) ? first : undefined;
+}
 const STATE_RANK: Record<McpState, number> = { unreadable: 3, outdated: 2, absent: 1, installed: 0 };
 
 function inspectOne(agent: AgentDef, target: string, ctx: Ctx) {
@@ -149,14 +155,15 @@ function cliFor(agent: AgentDef, ctx: Ctx): { bin: string; cli: NonNullable<Agen
 
 async function mcpStatus(agent: AgentDef, ctx: Ctx): Promise<McpStatus> {
   const { mcp } = agent;
-  const base = { kind: mcp.kind, verified: mcp.verified, source: mcp.source, note: mcp.note };
+  const base = { kind: mcp.kind, verified: mcp.verified, source: firstUrl(mcp.source), note: mcp.note };
   if (mcp.kind === 'none') return { ...base, mode: 'unsupported', state: 'unsupported' };
   const targets = mcpTargets(agent, ctx);
   const shown = targets[0] ? displayAgentPath(targets[0], ctx) : undefined;
   const extraPaths = targets.slice(1).map((t) => displayAgentPath(t, ctx));
   if (!AUTO_KINDS.includes(mcp.kind) || !mcp.verified || targets.length === 0) {
-    const detail = !mcp.verified ? '配置格式还没核实，请按说明手动添加'
-      : mcp.kind === 'jsonc' ? '配置文件带注释，App 不改它，请手动添加' : undefined;
+    const detail = mcp.manualReason ?? (!mcp.verified ? '配置格式还没核实，请按说明手动添加'
+      : mcp.kind === 'jsonc' ? '配置文件带注释，App 不改它，请手动添加'
+        : '这个 agent 只能在它自己的界面或配置里手动添加');
     return { ...base, mode: 'manual', state: 'manual', path: shown, detail, snippet: snippetFor(agent, ctx) };
   }
   const inspected = await inspectAll(agent, targets, ctx);

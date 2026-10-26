@@ -72,10 +72,10 @@ function SkillDetail({ skill }: { skill: AgentStatus['skill'] }) {
   if (skill.state === 'foreign') {
     return <span style={noteStyle}>{withPaths(t('{path} 已存在且不是 AI Cut 装的，不会覆盖；要安装请先自行移走或改名这个目录'), { path })}</span>;
   }
-  if (skill.state === 'installed') return <span style={noteStyle}>{withPaths(t('已复制到 {path}'), { path })}</span>;
+  if (skill.state === 'installed') return <span style={noteStyle}>{withPaths(t('已装到 {path}'), { path })}</span>;
   return (
     <span style={{ ...noteStyle, display: 'flex', flexDirection: 'column', gap: 1 }}>
-      <span>{withPaths(t('复制到 {path}'), { path })}</span>
+      <span>{withPaths(t('装到 {path}'), { path })}</span>
       {skill.state === 'outdated' ? <span>{t('技能文件与当前 AI Cut 自带的版本不一致')}</span> : null}
     </span>
   );
@@ -168,10 +168,10 @@ export function UninstallConfirm({ agent, locked, onConfirm, onCancel }: { agent
   const mcp = agent.mcp.path ?? '';
   const skill = agent.skill.path ?? '';
   const text = parts.includes('mcp') && parts.includes('skill')
-    ? withPaths(t('将从 {mcp} 删除 ai-cut 项，并删除 {skill}。改动前配置文件会备份到 ~/.ai-cut/agent-backups/，重新安装即可恢复。'), { mcp, skill })
+    ? withPaths(t('将从 {mcp} 删除 ai-cut 项，并移除 {skill}（技能文件本身保留在 ~/.ai-cut/agent-skill/）。改动前配置文件会备份到 ~/.ai-cut/agent-backups/，重新安装即可恢复。'), { mcp, skill })
     : parts.includes('mcp')
       ? withPaths(t('将从 {mcp} 删除 ai-cut 项。改动前配置文件会备份到 ~/.ai-cut/agent-backups/，重新安装即可恢复。'), { mcp })
-      : withPaths(t('将删除 {skill}。重新安装即可恢复。'), { skill });
+      : withPaths(t('将移除 {skill}（技能文件本身保留在 ~/.ai-cut/agent-skill/）。重新安装即可恢复。'), { skill });
   return (
     <div
       role="group"

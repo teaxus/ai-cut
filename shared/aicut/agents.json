@@ -620,7 +620,8 @@
         },
         "verified": true,
         "source": "https://modelcontextprotocol.io/docs/develop/connect-local-servers ; https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp ; https://github.com/geelen/mcp-remote",
-        "note": "AI Cut 不自动写入：Claude Desktop 的配置文件只能放本地（stdio）服务，接 AI Cut 需要用 npx 运行第三方桥接包 mcp-remote，每次启动 Claude Desktop 都会联网下载执行它；由用户确认后自行粘贴。 原注：官方：claude_desktop_config.json 只用于本地(stdio)服务；远程自定义连接器(Customize > Connectors，支持 Request headers)由 Anthropic 云端发起连接，连不到本机 127.0.0.1，所以不能直接写 url。可行做法是用第三方 stdio 桥 mcp-remote（需用户装 Node/npx；--allow-http 用于 http URL；header 值放进 env 避免 args 里的空格在 Windows 被拆，见 mcp-remote README）。桥接写法出自 mcp-remote 仓库而非 Anthropic 文档，路径与容器键出自 MCP 官方文档。官方只给 macOS/Windows 路径，Linux 未写。"
+        "note": "AI Cut 不自动写入：Claude Desktop 的配置文件只能放本地（stdio）服务，接 AI Cut 需要用 npx 运行第三方桥接包 mcp-remote，每次启动 Claude Desktop 都会联网下载执行它；由用户确认后自行粘贴。 原注：官方：claude_desktop_config.json 只用于本地(stdio)服务；远程自定义连接器(Customize > Connectors，支持 Request headers)由 Anthropic 云端发起连接，连不到本机 127.0.0.1，所以不能直接写 url。可行做法是用第三方 stdio 桥 mcp-remote（需用户装 Node/npx；--allow-http 用于 http URL；header 值放进 env 避免 args 里的空格在 Windows 被拆，见 mcp-remote README）。桥接写法出自 mcp-remote 仓库而非 Anthropic 文档，路径与容器键出自 MCP 官方文档。官方只给 macOS/Windows 路径，Linux 未写。",
+        "manualReason": "Claude Desktop 的配置只能直接运行本地服务：这段配置会让它在启动时用 npx 下载并运行第三方桥接包 mcp-remote 来连接 AI Cut。确认能接受再粘贴。"
       }
     },
     {

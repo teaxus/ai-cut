@@ -24,10 +24,10 @@ export interface SummaryBarProps {
 function BatchConsequence({ files, skills }: { files: number; skills: number }) {
   const t = useT();
   const text = files > 0 && skills > 0
-    ? t('将修改 {files} 个配置文件、复制 {skills} 份技能；改动前原文件备份到 ~/.ai-cut/agent-backups/', { files, skills })
+    ? t('将修改 {files} 个配置文件、在 {skills} 处装上技能；改动前原文件备份到 ~/.ai-cut/agent-backups/', { files, skills })
     : files > 0
       ? t('将修改 {files} 个配置文件；改动前原文件备份到 ~/.ai-cut/agent-backups/', { files })
-      : t('将复制 {skills} 份技能', { skills });
+      : t('将在 {skills} 处装上技能', { skills });
   return <span style={noteStyle}>{text}</span>;
 }
 

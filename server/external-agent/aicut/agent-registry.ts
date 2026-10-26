@@ -27,6 +27,8 @@ export interface AgentMcpDef {
   readonly extraFiles?: readonly PlatformPath[];
   /** 优先用 agent 自己的命令行写入（参数里可用 {name} {json}）；命令不在 PATH 或失败时退回直接写文件 */
   readonly cli?: { readonly command: string; readonly install: readonly string[]; readonly uninstall: readonly string[] };
+  /** 只能手动添加时给用户看的原因（一句话，界面原样显示）；不写则用通用说法 */
+  readonly manualReason?: string;
 }
 
 export interface AgentDef {
@@ -91,7 +93,7 @@ export function validateAgent(raw: unknown): { agent: AgentDef | null; problems:
       mcp: {
         kind: mcp.kind, file: mcp.file, dir: mcp.dir, fileName: mcp.fileName, container: mcp.container,
         entry: mcp.entry, template: mcp.template, verified: mcp.verified, source: mcp.source, note: mcp.note,
-        extraFiles: mcp.extraFiles, cli: mcp.cli,
+        extraFiles: mcp.extraFiles, cli: mcp.cli, manualReason: mcp.manualReason,
       },
     },
     problems,

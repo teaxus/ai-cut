@@ -166,6 +166,29 @@ test('附加文件（extraFiles）只在已存在时同步写', async () => {
   assert.equal(after.mcp.state, 'installed'); assert.equal(after.skill.state, 'installed');
 });
 
+test('只能手动的原因与配置说明链接：用注册表的 manualReason，source 有多个网址时只给第一个', async () => {
+  const { opts } = setup();
+  const reg = loadRegistry({ schemaVersion: 1, verifiedAt: 'x', agents: [
+    { id: 'copy-agent', name: 'Copy', detect: { paths: ['~/.json-agent'], commands: [] }, skills: { supported: false },
+      mcp: { kind: 'copy', entry: { url: '{url}' }, verified: true, manualReason: '要先确认 X', source: 'https://a.example/docs ; https://b.example' } },
+    { id: 'copy-plain', name: 'Plain', detect: { paths: ['~/.json-agent'], commands: [] }, skills: { supported: false },
+      mcp: { kind: 'copy', entry: { url: '{url}' }, verified: true, source: 'not a url' } },
+  ] }).registry;
+  const [a, b] = await listAgentStatuses({ ...opts, registry: reg });
+  assert.equal(a.mcp.detail, '要先确认 X');
+  assert.equal(a.mcp.source, 'https://a.example/docs');
+  assert.match(b.mcp.detail ?? '', /自己的界面或配置/);
+  assert.equal(b.mcp.source, undefined);
+});
+
+test('备份文件名不以点开头', async () => {
+  const { home, opts } = setup();
+  writeFileSync(join(home, '.codex-like', 'config.toml'), 'a = 1\n');
+  await applyAgents(opts, 'install', ['codex-like'], ['mcp']);
+  const [stampDir] = readdirSync(join(home, '.ai-cut', 'agent-backups'));
+  assert.deepEqual(readdirSync(join(home, '.ai-cut', 'agent-backups', stampDir)), ['codex-like__config.toml']);
+});
+
 test('真实注册表本身合法（shared/aicut/agents.json）', () => {
   const real = loadRegistry();
   assert.deepEqual(real.problems, []);
