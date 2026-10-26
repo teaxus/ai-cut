@@ -234,7 +234,9 @@ if ($Smoke -and -not $DirOnly) {
     $env:CC_SMOKE = '1'; $env:CC_SMOKE_RENDER = '1'
     $out = Join-Path $WorkDir "smoke-stdout.log"; $err = Join-Path $WorkDir "smoke-stderr.log"
     Say "冒烟：启动 / smoke: launching $($exe.Name)（最长 420 秒 / up to 420s）"
-    $app = Start-Process -FilePath $exe.FullName -PassThru -RedirectStandardOutput $out -RedirectStandardError $err
+    # SSH 会话是 Windows 的服务会话 0，没有显卡：GPU 进程一启动就崩（exit_code=34），上游的恢复逻辑重载窗口后
+    # 页面加载被中断（2026-10-25 g1 实测）。冒烟只验应用行为，直接用软件渲染；真实用户的桌面会话不受影响。
+    $app = Start-Process -FilePath $exe.FullName -ArgumentList @('--disable-gpu') -PassThru -RedirectStandardOutput $out -RedirectStandardError $err
     $null = $app.Handle
     $finished = $app.WaitForExit(420000)
     if (-not $finished) { taskkill /T /F /PID $app.Id 2>$null | Out-Null }
