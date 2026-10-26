@@ -14,15 +14,20 @@
 | 编号 | 文件 | 标记 | 合并策略 | 状态 | 意图 |
 |---|---|---|---|---|---|
 | IP-01 | `.gitignore` | `aicut-hook:IP-01` | keep-hook | landed | 末尾的 ai-cut 块：把 `docs/`、`CLAUDE.md`、`AGENTS.md`、`.claude/` 纳入版本管理，忽略派生版本地产物 |
-| IP-02 | `src/ui/upstreamUpdate.ts` | `aicut-hook:IP-02` | ours | planned | 更新检查 URL 和"前往发布页" URL 指向派生仓库；版本比较认 `-aicut.N` 后缀 |
-| IP-03 | `src/ui/upstreamUpdate.verify.ts` | `aicut-hook:IP-03` | ours | planned | 跟随 IP-02 的断言 |
-| IP-04 | `index.html` | `aicut-hook:IP-04` | ours | planned | 页面标题（Electron 窗口标题跟随它）和 favicon |
-| IP-05 | `public/openchatcut-icon.png` | — | binary-ours | planned | 原地替换为 AI Cut 图标（Win/Linux 安装包图标、favicon、应用内 BrandMark 都引用这个路径） |
-| IP-06 | `src/components/icons.tsx` | `aicut-hook:IP-06` | ours | planned | 字标 `OpenChatCutWordmark` 换成 AI Cut 字标 |
-| IP-07 | `src/components/DashboardHeaderLinks.tsx` | `aicut-hook:IP-07` | ours | planned | 源码链接指向派生仓库（AGPL 源码入口），去掉上游作者邮箱 |
-| IP-08 | `desktop/embedded-port.ts` | `aicut-hook:IP-08` | ours | planned | 规范端口 5299、端口记忆文件放派生数据目录，与上游并装时不抢 5199 |
+| IP-02 | `src/ui/upstreamUpdate.ts` | `aicut-hook:IP-02` | ours | landed | 更新检查 URL 和"前往发布页" URL 指向派生仓库（来自 `shared/aicut/release.ts`）；当前版本号 = 上游版本 + `-aicut.N` |
+| IP-03 | `src/ui/upstreamUpdate.verify.ts` | `aicut-hook:IP-03` | ours | landed | 跟随 IP-02：断言请求的是派生仓库的 releases/latest |
+| IP-04 | `index.html` | `aicut-hook:IP-04` | ours | landed | 页面标题 AI Cut（Electron 窗口标题跟随它）；favicon 路径不变，图片本身由 IP-05 替换 |
+| IP-05 | `public/openchatcut-icon.png` | — | binary-ours | landed | 原地替换为 AI Cut 图标（512px，源图 `assets/aicut/icon.png`）；Win/Linux 图标、favicon、应用内 BrandMark 都引用这个路径 |
+| IP-06 | `src/components/icons.tsx` | `aicut-hook:IP-06` | ours | landed | 字标换成 "AI Cut"；组件名 `OpenChatCutWordmark` 保持不变，调用方不用改 |
+| IP-07 | `src/components/DashboardHeaderLinks.tsx` | `aicut-hook:IP-07` | ours | landed | GitHub 链接（AGPL 源码入口）指向派生仓库；"联系作者"改为派生仓库的 issues 页，不再显示上游作者邮箱 |
+| IP-08 | `desktop/embedded-port.ts` | `aicut-hook:IP-08` | ours | landed | 规范端口改为读 `AICUT_CANONICAL_PORT`（派生入口设 5299，不设时仍是 5199）；端口记忆文件跟随 `AICUT_HOME` |
 | IP-09 | `server/plugins/index.ts` | `aicut-hook:IP-09` | keep-hook | planned | 插件数组末尾 `...aicutServerPlugins()`，派生服务端插件全部在 `server/plugins/aicut/` |
 | IP-10 | `src/components/settings/settingsSchema.ts` | `aicut-hook:IP-10` | keep-hook | planned | 设置分类数组末尾追加「Agent 接入」分区 |
 | IP-11 | `src/i18n/dict/en/index.ts`（it、ru 同） | `aicut-hook:IP-11` | keep-hook | planned | 组装字典时并入 `aicut.ts` 词条 |
+| IP-12 | `src/components/chat/ChatPanelView.tsx` | `aicut-hook:IP-12` | ours | landed | 聊天栏折叠时的竖排品牌字 AI Cut |
+| IP-13 | `server/runtime-profile.ts` | `aicut-hook:IP-13` | keep-hook | landed | 默认 profile 的数据根目录改走 `openChatCutHomeRoot()`：设了 `AICUT_HOME`（派生入口设为 `~/.ai-cut`）就用它，否则与上游一致 |
+| IP-14 | `server/data-dir.ts` | `aicut-hook:IP-14` | keep-hook | landed | 数据目录指针文件跟随 `AICUT_HOME`，设置页改数据目录不会写进上游的 `~/.openchatcut` |
+| IP-15 | `server/mcp-token.ts` | `aicut-hook:IP-15` | keep-hook | landed | MCP token 文件跟随 `AICUT_HOME`，与上游并装时各用各的 token |
+
 
 新增接入点时：编号顺延，不复用旧编号；删除接入点时把状态改成 `removed` 并写明原因，不删行。

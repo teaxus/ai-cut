@@ -2,6 +2,7 @@ import { randomBytes } from 'node:crypto';
 import { mkdirSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { dirname, join } from 'node:path';
+import { openChatCutHomeRoot } from '../shared/aicut/home.ts'; // aicut-hook:IP-15
 
 /** 32 random bytes as base64url, the shape externalMcpToken always minted. */
 const TOKEN_PATTERN = /^[A-Za-z0-9_-]{43}$/;
@@ -23,7 +24,7 @@ export interface McpTokenLocation {
 export function mcpTokenPath({ home = homedir(), profileId }: McpTokenLocation = {}): string {
   const root = profileId
     ? join(home, '.openchatcut', 'dev-profiles', profileId)
-    : join(home, '.openchatcut');
+    : openChatCutHomeRoot(home); // aicut-hook:IP-15
   return join(root, 'mcp-token');
 }
 

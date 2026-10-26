@@ -42,7 +42,7 @@ function CollapsedPanel({ controller }: { controller: ChatPanelController }) {
         style={{ background: 'none', border: 'none', color: theme.textDim, cursor: 'pointer', fontSize: 14 }}>
         <span style={{ transform: 'rotate(-90deg)', display: 'inline-flex' }}><Icon name="chevronDown" size={14} /></span>
       </button>
-      <div className="cc-chat-collapsed-brand">OpenChatCut</div>
+      <div className="cc-chat-collapsed-brand">AI Cut{/* aicut-hook:IP-12 */}</div>
     </aside>
   </>;
 }

@@ -1,6 +1,7 @@
 import { homedir } from 'node:os';
 import { isAbsolute, join, resolve } from 'node:path';
 import { readDataDirPointer } from './data-dir.ts';
+import { openChatCutHomeRoot } from '../shared/aicut/home.ts'; // aicut-hook:IP-13
 
 export const DEV_PROFILE_ID_ENV = 'OPENCHATCUT_DEV_PROFILE_ID';
 export const DATA_DIR_ENV = 'OPENCHATCUT_DATA_DIR';
@@ -141,7 +142,7 @@ export function resolveRuntimeProfile(
     );
     return Object.freeze({ mode: 'isolated-dev', id: profileId, ...base });
   }
-  const rootDir = dataDir ?? join(home, '.openchatcut');
+  const rootDir = dataDir ?? openChatCutHomeRoot(home); // aicut-hook:IP-13
   const authOverride = env.OPENCHATCUT_PROJECT_STORE_AUTH_DIR?.trim();
   const generationOverride = env.OPENCHATCUT_GENERATION_JOB_STORE;
   const base = profileBase(
@@ -180,5 +181,5 @@ export function defaultRootDir(
 ): string {
   return isIsolatedDevProfile(profile)
     ? join(home, '.openchatcut', 'dev-profiles', profile.id)
-    : join(home, '.openchatcut');
+    : openChatCutHomeRoot(home); // aicut-hook:IP-13
 }

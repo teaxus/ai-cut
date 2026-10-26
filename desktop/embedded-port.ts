@@ -2,9 +2,10 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import type { Server } from 'node:http';
 import { homedir } from 'node:os';
 import { dirname, join } from 'node:path';
+import { canonicalEmbeddedPort, openChatCutHomeRoot } from '../shared/aicut/home.ts'; // aicut-hook:IP-08
 
 /** The documented external-MCP address; README and the MCP panel assume it. */
-export const CANONICAL_EMBEDDED_PORT = 5199;
+export const CANONICAL_EMBEDDED_PORT = canonicalEmbeddedPort(5199); // aicut-hook:IP-08
 
 export interface EmbeddedPortLocation {
   /** Overridable for tests; never for callers wiring the real server. */
@@ -22,7 +23,7 @@ export interface EmbeddedPortLocation {
 export function embeddedPortPath({ home = homedir(), profileId }: EmbeddedPortLocation = {}): string {
   const root = profileId
     ? join(home, '.openchatcut', 'dev-profiles', profileId)
-    : join(home, '.openchatcut');
+    : openChatCutHomeRoot(home); // aicut-hook:IP-08
   return join(root, 'mcp-port');
 }
 

@@ -139,27 +139,30 @@ export function BrandMark({ size = 16 }: { size?: number }) {
   );
 }
 
-/** OpenChatCut word mark: OPEN reverse white badge + Chat Cut solid word mark. */
+/** aicut-hook:IP-06 AI Cut 字标：反白徽章 "AI" + 实心 "Cut"（沿用上游 OPEN + Chat Cut 的排版）。
+ * 组件名保持上游的 OpenChatCutWordmark，调用方不用改；width 仍按上游的占位宽度理解，
+ * 高度 = width / 4 与上游一致，实际宽度按字标比例收窄。 */
 export function OpenChatCutWordmark({ width = 126 }: { width?: number }) {
+  const height = width / 4;
   return (
     <svg
-      aria-label="OpenChatCut"
+      aria-label="AI Cut"
       role="img"
-      width={width}
-      height={width / 4}
-      viewBox="0 0 504 126"
+      width={height * (262 / 126)}
+      height={height}
+      viewBox="0 0 262 126"
       style={{ display: 'block', flexShrink: 0 }}
     >
-      <rect x="0" y="13" width="166" height="92" rx="14" fill="currentColor" />
+      <rect x="0" y="13" width="118" height="92" rx="14" fill="currentColor" />
       <text
         fontFamily="Inter, Geist, system-ui, sans-serif"
         dominantBaseline="alphabetic"
       >
-        <tspan x="83" y="82" textAnchor="middle" fill="var(--cc-panel)" fontSize="58" fontWeight="850" letterSpacing="-0.045em">
-          OPEN
+        <tspan x="59" y="82" textAnchor="middle" fill="var(--cc-panel)" fontSize="58" fontWeight="850" letterSpacing="-0.02em">
+          AI
         </tspan>
-        <tspan x="188" y="79" fill="currentColor" fontSize="62" fontWeight="720" letterSpacing="-0.045em">
-          Chat Cut
+        <tspan x="138" y="79" fill="currentColor" fontSize="62" fontWeight="720" letterSpacing="-0.045em">
+          Cut
         </tspan>
       </text>
     </svg>

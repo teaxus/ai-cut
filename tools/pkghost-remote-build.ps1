@@ -76,6 +76,23 @@ if (-not $npm)  { throw "找不到 npm / npm not on PATH" }
 Run "node" @("-v")
 Run "npm"  @("-v")
 
+# ai-cut：上游 scripts/sync-whisper-cli.mjs 在 Windows 上用 `unzip` 解压 whisper.cpp 的发行包。
+# GitHub 的 Windows runner 自带 unzip，SSH 会话的 PATH 里通常没有；Git for Windows 在 usr\bin 下带了一份。
+# 追加到 PATH 末尾（不是开头），免得 usr\bin 里的 find / sort / link 盖掉 Windows 自己的同名命令。
+if (-not (Get-Command unzip -ErrorAction SilentlyContinue)) {
+  $gitExe = Get-Command git -ErrorAction SilentlyContinue
+  if ($gitExe) {
+    $usrBin = Join-Path (Split-Path (Split-Path $gitExe.Source -Parent) -Parent) "usr\bin"
+    if (Test-Path -LiteralPath (Join-Path $usrBin "unzip.exe")) {
+      $env:Path = "$env:Path;$usrBin"
+      Write-Host "    unzip: $usrBin（Git for Windows 自带 / bundled with Git for Windows）"
+    }
+  }
+}
+if (-not (Get-Command unzip -ErrorAction SilentlyContinue)) {
+  throw "找不到 unzip（上游 sync-whisper-cli 解压 whisper.cpp 要用）—— 请安装 Git for Windows 或把 unzip.exe 放进 PATH / unzip not found"
+}
+
 # python 只在【真有侧车要打】时才是硬依赖 —— 而「有没有侧车」要等源码解出来才知道（见下方侧车段），
 # 所以这里只探测、不因为缺 python 就终止。原来在这儿硬 throw 会让所有【无侧车项目】在还没解压源码时
 # 就构建失败，报错还指向一个它根本不需要的东西。

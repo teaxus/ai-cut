@@ -11,10 +11,11 @@ import { cp, mkdir, readdir, rename, rm, unlink, writeFile } from 'node:fs/promi
 import { homedir } from 'node:os';
 import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { mergePublishLedgers } from './plugins/upload-post-ledger.ts';
+import { openChatCutHomeRoot } from '../shared/aicut/home.ts'; // aicut-hook:IP-14
 
 /** Fixed pointer location — deliberately outside the movable storage root. */
 export function dataDirPointerPath(home: string = homedir()): string {
-  return join(home, '.openchatcut', 'data-dir.json');
+  return join(openChatCutHomeRoot(home), 'data-dir.json'); // aicut-hook:IP-14
 }
 
 /** Expand ~/ and require an absolute path; anything else is rejected. */
@@ -45,7 +46,7 @@ export function readDataDirPointer(home: string = homedir()): string | null {
 /** Record the storage root, or clear it (empty value) to return to the default. */
 export async function writeDataDirPointer(dir: string | null, home: string = homedir()): Promise<void> {
   const pointer = dataDirPointerPath(home);
-  await mkdir(join(home, '.openchatcut'), { recursive: true });
+  await mkdir(openChatCutHomeRoot(home), { recursive: true }); // aicut-hook:IP-14
   if (!dir) {
     await unlink(pointer).catch(() => undefined);
     return;

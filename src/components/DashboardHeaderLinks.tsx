@@ -3,8 +3,11 @@ import { useT } from '../i18n/locale';
 import { theme } from '../theme';
 import { Icon } from './icons';
 
-const PROJECT_REPOSITORY_URL = 'https://github.com/0xsline/OpenChatCut';
-const AUTHOR_EMAIL = 'hl2535771@gmail.com';
+// aicut-hook:IP-07 源码链接（AGPL 源码入口）与"联系作者"都指向 AI Cut 仓库，不把派生版的问题引到上游作者。
+import { AICUT_ISSUES_URL, AICUT_REPOSITORY_URL } from '../../shared/aicut/release';
+const PROJECT_REPOSITORY_URL = AICUT_REPOSITORY_URL;
+const CONTACT_URL = AICUT_ISSUES_URL;
+const CONTACT_LABEL = AICUT_ISSUES_URL.replace(/^https:\/\//, '');
 const CONTACT_POPOVER_ID = 'cc-dashboard-contact';
 
 function useDismissablePopover<T extends HTMLElement>(
@@ -65,8 +68,8 @@ export function DashboardHeaderLinks() {
       {contactOpen && (
         <div id={CONTACT_POPOVER_ID} role="dialog" aria-label={t('联系作者')} style={contactPopover}>
           <span style={contactLabel}>{t('联系作者')}</span>
-          <a href={`mailto:${AUTHOR_EMAIL}`} data-cc-titlebar-control="true" style={contactEmail}>
-            {AUTHOR_EMAIL}
+          <a href={CONTACT_URL} target="_blank" rel="noopener noreferrer" data-cc-titlebar-control="true" style={contactEmail}>
+            {CONTACT_LABEL}
           </a>
         </div>
       )}

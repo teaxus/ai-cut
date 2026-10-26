@@ -3,11 +3,13 @@ import type {
   DesktopUpdateState,
 } from '../../shared/desktop-update';
 
-export const UPSTREAM_LATEST_RELEASE_URL = 'https://api.github.com/repos/0xsline/OpenChatCut/releases/latest';
-export const UPSTREAM_RELEASES_URL = 'https://github.com/0xsline/OpenChatCut/releases/latest';
+// aicut-hook:IP-02 更新检查与"前往发布页"指向 AI Cut 的 Releases；当前版本带派生修订号（-aicut.N）。
+import { AICUT_LATEST_RELEASE_API_URL, AICUT_RELEASES_URL, aicutVersion } from '../../shared/aicut/release';
+export const UPSTREAM_LATEST_RELEASE_URL = AICUT_LATEST_RELEASE_API_URL;
+export const UPSTREAM_RELEASES_URL = AICUT_RELEASES_URL;
 
 export const CURRENT_APP_VERSION =
-  typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '0.0.0';
+  aicutVersion(typeof __APP_VERSION__ !== 'undefined' ? __APP_VERSION__ : '0.0.0');
 
 type Fetcher = (input: string | URL | Request, init?: RequestInit) => Promise<Response>;
 type CheckSource = 'auto' | 'manual';

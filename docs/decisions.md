@@ -14,3 +14,6 @@
 | D-10 | 2026-10-25 | 版本号：`<上游版本>-aicut.<N>`，`package.json` 不动，打包时注入 | `package.json` 是上游冲突第一源 |
 | D-11 | 2026-10-25 | 默认界面语言沿用上游逻辑（已保存的选择 → 系统语言 zh/it/ru → 英文），不设接入点 | 上游已按系统语言选中文，原方案的"建议改"没有必要 |
 | D-12 | 2026-10-25 | `README.md`、`README_ZH.md` 完全由派生版维护（`.gitattributes` 的 `merge=ours`） | 上游 README 改动频繁（84 次），派生版的 README 内容本来就不同 |
+| D-13 | 2026-10-25 | 模型缓存、内容插件（`~/.openchatcut/plugins`）、用户技能（`~/.openchatcut/skills`）、Codex/Copilot 隔离目录与上游共用 | 这些是可复用资产，共用无害且省空间；隔离它们要多改 4 个上游文件 |
+| D-14 | 2026-10-25 | 派生入口 `desktop/aicut/entry.ts` 在加载上游主进程前设置 `AICUT_HOME=~/.ai-cut`、`AICUT_CANONICAL_PORT=5299`；上游代码里只把写死的 `~/.openchatcut` 与 5199 换成读这两个变量的函数（不设时与上游一致） | 上游 verify 不受影响；派生行为集中在一个入口文件里 |
+| D-15 | 2026-10-25 | macOS 无证书时由派生打包配置显式 ad-hoc 签名（osx-sign `identity: '-'`） | electron-builder 26 把上游的 `identity: '-'` 当子串匹配钥匙串证书，本机会误用名字带 "-" 的自签证书 |

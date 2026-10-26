@@ -1,0 +1,8 @@
+{
+  "product": "AI Cut",
+  "appId": "com.teaxus.aicut",
+  "repository": "teaxus/ai-cut",
+  "upstreamRepository": "0xsline/OpenChatCut",
+  "upstreamTag": "v0.2.17",
+  "revision": 1
+}
