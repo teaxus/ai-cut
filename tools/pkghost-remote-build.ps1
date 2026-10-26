@@ -115,6 +115,11 @@ if ($Proxy) {
   # Node 自己的 http/https 默认不认这些变量：electron-builder 用 got 下载 NSIS / winCodeSign 等工具时会直连并超时
   # （2026-10-25 实测 Timeout awaiting 'request' for 600000ms）。Node 24 起 NODE_USE_ENV_PROXY=1 让它走代理。
   $env:NODE_USE_ENV_PROXY = "1"
+  # electron-builder 26 下载 Electron、NSIS、winCodeSign 用的是 @electron/get（got + 自带 agent），上面那个开关管不到它；
+  # 它只认 ELECTRON_GET_USE_PROXY + global-agent 的代理变量（2026-10-25 g1 实测：不设就 Timeout awaiting 'request'）。
+  $env:ELECTRON_GET_USE_PROXY = "true"
+  $env:GLOBAL_AGENT_HTTPS_PROXY = $Proxy; $env:GLOBAL_AGENT_HTTP_PROXY = $Proxy
+  $env:GLOBAL_AGENT_NO_PROXY = "localhost,127.0.0.1,::1"
   Write-Host "    proxy: $Proxy（构建下载走代理 / downloads go through this proxy）"
 } else {
   Write-Host "    proxy: 未使用 / none"
