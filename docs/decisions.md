@@ -17,3 +17,8 @@
 | D-13 | 2026-10-25 | 模型缓存、内容插件（`~/.openchatcut/plugins`）、用户技能（`~/.openchatcut/skills`）、Codex/Copilot 隔离目录与上游共用 | 这些是可复用资产，共用无害且省空间；隔离它们要多改 4 个上游文件 |
 | D-14 | 2026-10-25 | 派生入口 `desktop/aicut/entry.ts` 在加载上游主进程前设置 `AICUT_HOME=~/.ai-cut`、`AICUT_CANONICAL_PORT=5299`；上游代码里只把写死的 `~/.openchatcut` 与 5199 换成读这两个变量的函数（不设时与上游一致） | 上游 verify 不受影响；派生行为集中在一个入口文件里 |
 | D-15 | 2026-10-25 | macOS 无证书时由派生打包配置显式 ad-hoc 签名（osx-sign `identity: '-'`） | electron-builder 26 把上游的 `identity: '-'` 当子串匹配钥匙串证书，本机会误用名字带 "-" 的自签证书 |
+| D-16 | 2026-10-25 | 技能安装用 App 自己的目录复制器，不内置 vercel-labs/skills CLI；只借用它（MIT）的 agent 技能目录表 | 那个 CLI 没有可编程 API，内置它要改 `package.json`；技能本质就是一个目录，复制即可 |
+| D-17 | 2026-10-25 | Claude Desktop 只给"复制配置"，不自动写入 | 它的配置只能放本地 stdio 服务，接 AI Cut 要用 npx 运行第三方桥接包 mcp-remote（每次启动联网下载执行），应由用户自己决定 |
+| D-18 | 2026-10-25 | Claude Code 优先用 `claude mcp add-json --scope user` 写入，命令不在或失败时才直接合并 `~/.claude.json`，写完回读确认 | `~/.claude.json` 是 Claude Code 运行时频繁写入的状态文件，直接改有并发覆盖风险 |
+| D-19 | 2026-10-25 | MCP 服务名用 `ai-cut`（不用上游的 `openchatcut`），技能名 `ai-cut` | 与上游 OpenChatCut 并装时各自的 agent 配置互不覆盖 |
+| D-20 | 2026-10-25 | Windows 远端打包自动探测打包主机本机代理，并设 `NODE_USE_ENV_PROXY=1` | SSH 会话不继承桌面会话的代理；electron-builder 用 Node 的 got 下载工具，默认不认代理变量（实测超时） |

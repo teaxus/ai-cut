@@ -112,6 +112,9 @@ if (-not $Proxy -and -not $env:HTTPS_PROXY) {
 if ($Proxy) {
   $env:HTTPS_PROXY = $Proxy; $env:HTTP_PROXY = $Proxy
   $env:NO_PROXY = "localhost,127.0.0.1,::1"
+  # Node 自己的 http/https 默认不认这些变量：electron-builder 用 got 下载 NSIS / winCodeSign 等工具时会直连并超时
+  # （2026-10-25 实测 Timeout awaiting 'request' for 600000ms）。Node 24 起 NODE_USE_ENV_PROXY=1 让它走代理。
+  $env:NODE_USE_ENV_PROXY = "1"
   Write-Host "    proxy: $Proxy（构建下载走代理 / downloads go through this proxy）"
 } else {
   Write-Host "    proxy: 未使用 / none"
