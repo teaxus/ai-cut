@@ -72,8 +72,8 @@ show_help() {
 
   hosts:
     g1:
-      host: teaxus-g1.local
-      user: teaxuspc
+      host: win-builder.local
+      user: builder
       key: ~/.ssh/pkghost_g1_key
       port: 22
       platform: windows

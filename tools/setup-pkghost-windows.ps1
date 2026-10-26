@@ -108,7 +108,7 @@ Say "写入 SSH 公钥 / installing the public key"
 $userAk = Join-Path $env:USERPROFILE ".ssh\authorized_keys"
 if (Add-KeyLine $userAk $PubKey) { Ok "写入 $userAk" } else { Ok "$userAk 已含该公钥" }
 
-# administrators_authorized_keys（管理员账户走这个 —— 本机 teaxuspc 属于管理员组）
+# administrators_authorized_keys（管理员账户走这个 —— 打包用的账户通常属于管理员组）
 $admAk = Join-Path $env:ProgramData "ssh\administrators_authorized_keys"
 if (Add-KeyLine $admAk $PubKey) { Ok "写入 $admAk" } else { Ok "$admAk 已含该公钥" }
 

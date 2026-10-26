@@ -141,7 +141,7 @@ ai-cut/                      ← fork 根，git remote: upstream = 0xsline/OpenC
 | 平台 | 做法 | 依据/备注 |
 |---|---|---|
 | macOS arm64 / x64 | 复用上游链路（`build` → `desktop:build:main` → `desktop:prebundle` → `prepare-target`），最后一步 electron-builder 换成 wrapper 配置；**分开打两个包**，不做 universal | skill 坑 A10；上游也是分开打 |
-| Windows x64 | 在 **g1**（`~/.pkghost.yaml` 已配好，`teaxus-g1.local`）上远程打包：`./build.sh --pkg g1 --platform windows`；远端需 Node 24、git；whisper 用上游 release 资产不需编译 | skill `tools/pkghost-*`；内网直连，不走 VPN（VPN 丢包） |
+| Windows x64 | 在 **g1**（`~/.pkghost.yaml` 已配好）上远程打包：`./build.sh --pkg g1 --platform windows`；远端需 Node 24、git；whisper 用上游 release 资产不需编译 | skill `tools/pkghost-*`；内网直连，不走 VPN（VPN 丢包） |
 | Linux | 默认不做（无验收设备；上游 x64 AppImage 仍可按需打） | 决策项 |
 | 签名 | mac：同上游 ad-hoc（无 Developer ID）；本机打包若钥匙串有证书，设 `CSC_IDENTITY_AUTO_DISCOVERY=false`；Windows 无证书（SmartScreen 提示） | skill 坑 A5；决策项 |
 | 网络 | 构建要访问 npm、storage.googleapis.com（Chrome for Testing、MediaPipe）、github.com（whisper.cpp 源码）；国内网络需代理 | 报告 §6 |
